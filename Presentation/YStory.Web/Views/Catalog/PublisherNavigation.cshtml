@@ -1,0 +1,25 @@
+﻿@model PublisherNavigationModel
+@using YStory.Web.Models.Catalog;
+@if (Model.Publishers.Count > 0)
+{
+    <div class="block block-publisher-navigation">
+        <div class="title">
+            <strong>@T("Publishers")</strong>
+        </div>
+        <div class="listbox">
+            <ul class="list">
+                @foreach (var publisher in Model.Publishers)
+                {
+                    <li class="@(publisher.IsActive ? "active" : "inactive")"><a href="@Url.RouteUrl("Publisher", new { SeName = publisher.SeName })">@publisher.Name</a>
+                    </li>
+                }
+            </ul>
+            @if (Model.TotalPublishers > Model.Publishers.Count)
+            {
+                <div class="view-all">
+                    <a href="@Url.RouteUrl("PublisherList")">@T("Publishers.ViewAll")</a>
+                </div>
+            }
+        </div>
+    </div>
+}

@@ -1,0 +1,261 @@
+﻿@model ShipmentDetailsModel
+@using YStory.Web.Models.Subscription;
+@{
+    Layout = "~/Views/Shared/_ColumnsOne.cshtml";
+
+    //title
+    Html.AddTitleParts(T("PageTitle.ShipmentDetails").Text);
+    //page class
+    Html.AppendPageCssClassParts("html-shipment-details-page");
+}
+<div class="page shipment-details-page">
+    <div class="page-title">
+        <h1>@string.Format(T("Subscription.Shipments.Information").Text, Model.Id)</h1>
+    </div>
+    <div class="page-body">
+        <div class="shipment-details-area">
+            <div class="subscription-info-wrap">
+                <div class="subscription-info">
+	                <div class="title">
+	                    <strong>@T("Subscription.Shipments.Subscription#")@Model.Subscription.Id</strong>
+	                </div>
+                    <ul class="info-list">
+                        <li class="shipping-method">
+                            @T("Subscription.Shipments.ShippingMethod"): @Model.Subscription.ShippingMethod
+                        </li>
+                        <li class="shipped-date">
+                            @T("Subscription.Shipments.ShippedDate"):
+                            @if (Model.ShippedDate.HasValue)
+                            {
+                                @Model.ShippedDate.Value.ToString("D")
+                            }
+                            else
+                            {
+                                @T("Subscription.Shipments.ShippedDate.NotYet")
+                            }
+                        </li>
+                        <li class="delivery-date">
+                            @T("Subscription.Shipments.DeliveryDate"):
+                            @if (Model.DeliveryDate.HasValue)
+                            {
+                                @Model.DeliveryDate.Value.ToString("D")
+                            }
+                            else
+                            {
+                                @T("Subscription.Shipments.DeliveryDate.NotYet")
+                            }
+                        </li>
+                        @if (!String.IsNullOrEmpty(Model.TrackingNumber))
+                        {
+                            <li class="tracking-number">
+                                @T("Subscription.Shipments.TrackingNumber"):
+                                @if (!string.IsNullOrEmpty(Model.TrackingNumberUrl))
+                                {
+                                    <a href="@Model.TrackingNumberUrl" target="_blank" class="tracking-url">@Model.TrackingNumber</a>
+                                }
+                                else
+                                {
+                                    @Model.TrackingNumber
+                                }
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+            <div class="shipping-info-wrap"> 
+                <div class="shipping-info">
+                    @if (!Model.Subscription.PickUpInStore)
+                    {
+                        <div class="title">
+                            <strong>@T("Subscription.Shipments.ShippingAddress")</strong>
+                        </div>
+                        <ul class="info-list">
+                            <li class="name">
+                                @Model.Subscription.ShippingAddress.FirstName @Model.Subscription.ShippingAddress.LastName
+                            </li>
+                            <li class="email">
+                                @T("Subscription.Shipments.Email"): @Model.Subscription.ShippingAddress.Email
+                            </li>
+                            <li class="phone">
+                                @T("Subscription.Shipments.Phone"): @Model.Subscription.ShippingAddress.PhoneNumber
+                            </li>
+                            <li class="fax">
+                                @T("Subscription.Shipments.Fax"): @Model.Subscription.ShippingAddress.FaxNumber
+                            </li>
+                            @if (!String.IsNullOrEmpty(Model.Subscription.ShippingAddress.Company))
+                            {
+                                <li class="company">
+                                    @Model.Subscription.ShippingAddress.Company
+                                </li>
+                            }
+                            <li class="address1">
+                                @Model.Subscription.ShippingAddress.Address1
+                            </li>
+                            @if (!String.IsNullOrEmpty(Model.Subscription.ShippingAddress.Address2))
+                            {
+                                <li class="address2">
+                                    @Model.Subscription.ShippingAddress.Address2
+                                </li>
+                            }
+                            <li class="city-state-zip">
+                                @Model.Subscription.ShippingAddress.City, @Model.Subscription.ShippingAddress.StateProvinceName
+                                @Model.Subscription.ShippingAddress.ZipPostalCode
+                            </li>
+                            @if (!String.IsNullOrEmpty(Model.Subscription.ShippingAddress.CountryName))
+                            {
+                                <li class="country">
+                                    @Model.Subscription.ShippingAddress.CountryName
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <div class="title">
+                            <strong>@T("Subscription.Shipments.PickupAddress")</strong>
+                        </div>
+                        <ul class="info-list">
+                            <li class="address1">
+                                @Model.Subscription.PickupAddress.Address1
+                            </li>
+                            <li class="city-state-zip">
+                                @Model.Subscription.PickupAddress.City,
+                                @Model.Subscription.PickupAddress.ZipPostalCode
+                            </li>
+                            @if (!string.IsNullOrEmpty(Model.Subscription.PickupAddress.CountryName))
+                            {
+                                <li class="country">
+                                    @Model.Subscription.PickupAddress.CountryName
+                                </li>
+                            }
+                        </ul>
+                    }
+                </div>
+            </div>
+        </div>
+
+        @if (Model.Items.Count > 0)
+        {
+            <div class="section articles">
+                <div class="title">
+                    <strong>@T("Subscription.Shipments.Article(s)")</strong>
+                </div>
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <colgroup>
+                            @if (Model.ShowSku)
+                            {
+                                <col width="1" />
+                            }
+                            <col />
+                            <col />
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                @if (Model.ShowSku)
+                                {
+                                    <th class="sku">
+                                        @T("Subscription.Shipments.Article(s).SKU")
+                                    </th>
+                                }
+                                <th class="name">
+                                    @T("Subscription.Shipments.Article(s).Name")
+                                </th>
+                                <th class="quantity">
+                                    @T("Subscription.Shipments.Article(s).Quantity")
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.Items)
+                            {
+                                <tr>
+                                    @if (Model.ShowSku)
+                                    {
+                                        <td class="sku">
+                                            @item.Sku
+                                        </td>
+                                    }
+                                    <td class="name">
+                                        <em><a href="@Url.RouteUrl("Article", new { SeName = item.ArticleSeName })">@item.ArticleName</a></em>
+                                        @if (!String.IsNullOrEmpty(item.AttributeInfo))
+                                        {
+                                            <div class="attributes">
+                                                @Html.Raw(item.AttributeInfo)
+                                            </div>
+                                        }
+                                        @if (!String.IsNullOrEmpty(item.RentalInfo))
+                                        {
+                                            <div class="rental-info">
+                                                @Html.Raw(item.RentalInfo)
+                                            </div>
+                                        }
+                                    </td>
+                                    <td class="quantity">
+                                        @item.QuantityShipped
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+        @if (Model.ShipmentStatusEvents.Count > 0)
+        {
+            <div class="section shipment-status-events">
+                <div class="title">
+                    <strong>@T("Subscription.ShipmentStatusEvents")</strong>
+                </div>
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <colgroup>
+                            <col />
+                            <col />
+                            <col />
+                            <col />
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th class="event">
+                                    @T("Subscription.ShipmentStatusEvents.Event")
+                                </th>
+                                <th class="location">
+                                    @T("Subscription.ShipmentStatusEvents.Location")
+                                </th>
+                                <th class="country">
+                                    @T("Subscription.ShipmentStatusEvents.Country")
+                                </th>
+                                <th class="date">
+                                    @T("Subscription.ShipmentStatusEvents.Date")
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.ShipmentStatusEvents)
+                            {
+                                <tr>
+                                    <td class="event">
+                                        @item.EventName
+                                    </td>
+                                    <td class="location">
+                                        @item.Location
+                                    </td>
+                                    <td class="country">
+                                        @item.Country
+                                    </td>
+                                    <td class="date">
+                                        @if (item.Date.HasValue)
+                                        {
+                                            @item.Date.Value.ToString("D")
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+    </div>
+</div>

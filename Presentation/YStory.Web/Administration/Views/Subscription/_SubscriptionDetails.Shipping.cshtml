@@ -1,0 +1,468 @@
+﻿@model SubscriptionModel
+
+<div class="panel-group">
+    @if (Model.IsShippable)
+    {
+        if (Model.ShippingAddress != null)
+        {
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.ShippingAddress)
+                        </div>
+                        <div class="col-md-9">
+                            <img alt="google maps" src="@Url.Content("~/Administration/Content/images/google-maps.gif")" />
+                            <a href="@Html.Raw(Model.ShippingAddressGoogleMapsUrl)" style="margin-bottom: 10px;" target="_blank">@T("Admin.Subscriptions.Fields.ShippingAddress.ViewOnGoogleMaps")</a>
+
+                            <table class="table table-hover table-bordered" style="max-width: 400px;">
+                                @if (Model.ShippingAddress.FirstNameEnabled || Model.ShippingAddress.LastNameEnabled)
+                                {
+                                    <tr>
+                                        <td>
+                                            @T("Admin.Subscriptions.Address.FullName")
+                                        </td>
+                                        <td>
+                                            @Model.ShippingAddress.FirstName @Model.ShippingAddress.LastName
+                                        </td>
+                                    </tr>
+                                }
+                                @if (Model.ShippingAddress.EmailEnabled)
+                                {
+                                    <tr>
+                                        <td>
+                                            @T("Admin.Subscriptions.Address.Email")
+                                        </td>
+                                        <td>
+                                            @Model.ShippingAddress.Email
+                                        </td>
+                                    </tr>
+                                }
+                                @if (Model.ShippingAddress.PhoneEnabled)
+                                {
+                                    <tr>
+                                        <td>
+                                            @T("Admin.Subscriptions.Address.Phone")
+                                        </td>
+                                        <td>
+                                            @Model.ShippingAddress.PhoneNumber
+                                        </td>
+                                    </tr>
+                                }
+                                @if (Model.ShippingAddress.FaxEnabled)
+                                {
+                                    <tr>
+                                        <td>
+                                            @T("Admin.Subscriptions.Address.Fax")
+                                        </td>
+                                        <td>
+                                            @Model.ShippingAddress.FaxNumber
+                                        </td>
+                                    </tr>
+                                }
+                                @if (Model.ShippingAddress.CompanyEnabled)
+                                {
+                                    <tr>
+                                        <td>
+                                            @T("Admin.Subscriptions.Address.Company")
+                                        </td>
+                                        <td>
+                                            @Model.ShippingAddress.Company
+                                        </td>
+                                    </tr>
+                                }
+                                @if (Model.ShippingAddress.StreetAddressEnabled)
+                                {
+                                    <tr>
+                                        <td>
+                                            @T("Admin.Subscriptions.Address.Address1")
+                                        </td>
+                                        <td>
+                                            @Model.ShippingAddress.Address1
+                                        </td>
+                                    </tr>
+                                }
+                                @if (Model.ShippingAddress.StreetAddress2Enabled)
+                                {
+                                    <tr>
+                                        <td>
+                                            @T("Admin.Subscriptions.Address.Address2")
+                                        </td>
+                                        <td>
+                                            @Model.ShippingAddress.Address2
+                                        </td>
+                                    </tr>
+                                }
+                                @if (Model.ShippingAddress.CityEnabled)
+                                {
+                                    <tr>
+                                        <td>
+                                            @T("Admin.Subscriptions.Address.City")
+                                        </td>
+                                        <td>
+                                            @Model.ShippingAddress.City
+                                        </td>
+                                    </tr>
+                                }
+                                @if (Model.ShippingAddress.StateProvinceEnabled)
+                                {
+                                    <tr>
+                                        <td>
+                                            @T("Admin.Subscriptions.Address.StateProvince")
+                                        </td>
+                                        <td>
+                                            @Model.ShippingAddress.StateProvinceName
+                                        </td>
+                                    </tr>
+                                }
+                                @if (Model.ShippingAddress.ZipPostalCodeEnabled)
+                                {
+                                    <tr>
+                                        <td>
+                                            @T("Admin.Subscriptions.Address.ZipPostalCode")
+                                        </td>
+                                        <td>
+                                            @Model.ShippingAddress.ZipPostalCode
+                                        </td>
+                                    </tr>
+                                }
+                                @if (Model.ShippingAddress.CountryEnabled)
+                                {
+                                    <tr>
+                                        <td>
+                                            @T("Admin.Subscriptions.Address.Country")
+                                        </td>
+                                        <td>
+                                            @Model.ShippingAddress.CountryName
+                                        </td>
+                                    </tr>
+                                }
+                                @if (!String.IsNullOrEmpty(Model.ShippingAddress.FormattedCustomAddressAttributes))
+                                {
+                                    <tr class="custom-attributes-view">
+                                        <td colspan="2">
+                                            @Html.Raw(Model.ShippingAddress.FormattedCustomAddressAttributes)
+                                        </td>
+                                    </tr>
+                                }
+                            </table>
+                        </div>
+                    </div>
+                    @if (!Model.IsLoggedInAsContributor)
+                    {
+                        <div class="form-group">
+                            <div class="col-md-9 col-md-offset-3">
+                                <a href="@Url.Action("AddressEdit", new {addressId = Model.ShippingAddress.Id, subscriptionId = Model.Id})" class="btn btn-primary">@T("Admin.Common.Edit")</a>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        if (Model.PickupAddress != null)
+        {
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.PickupAddress)
+                        </div>
+                        <div class="col-md-9">
+                            <img alt="google maps" src="@Url.Content("~/Administration/Content/images/google-maps.gif")" />
+                            <a href="@Html.Raw(Model.PickupAddressGoogleMapsUrl)" style="margin-bottom: 10px;" target="_blank">@T("Admin.Subscriptions.Fields.PickupAddress.ViewOnGoogleMaps")</a>
+
+                            <table class="table table-hover table-bordered" style="max-width: 400px;">
+                                @if (!string.IsNullOrEmpty(Model.PickupAddress.Address1))
+                                {
+                                    <tr>
+                                        <td>
+                                            @T("Admin.Subscriptions.Address.Address1")
+                                        </td>
+                                        <td>
+                                            @Model.PickupAddress.Address1
+                                        </td>
+                                    </tr>
+                                }
+                                @if (!string.IsNullOrEmpty(Model.PickupAddress.City))
+                                {
+                                    <tr>
+                                        <td>
+                                            @T("Admin.Subscriptions.Address.City")
+                                        </td>
+                                        <td>
+                                            @Model.PickupAddress.City
+                                        </td>
+                                    </tr>
+                                }
+                                @if (!string.IsNullOrEmpty(Model.PickupAddress.CountryName))
+                                {
+                                    <tr>
+                                        <td>
+                                            @T("Admin.Subscriptions.Address.Country")
+                                        </td>
+                                        <td>
+                                            @Model.PickupAddress.CountryName
+                                        </td>
+                                    </tr>
+                                }
+                                @if (!string.IsNullOrEmpty(Model.PickupAddress.ZipPostalCode))
+                                {
+                                    <tr>
+                                        <td>
+                                            @T("Admin.Subscriptions.Address.ZipPostalCode")
+                                        </td>
+                                        <td>
+                                            @Model.PickupAddress.ZipPostalCode
+                                        </td>
+                                    </tr>
+                                }
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="form-group">
+                    <div class="col-md-3">
+                        @Html.YStoryLabelFor(model => model.ShippingMethod)
+                    </div>
+                    <div class="col-md-9">
+                        @if (!Model.IsLoggedInAsContributor)
+                        {
+                            <script type="text/javascript">
+                                $(document).ready(function () {
+                                    toggleEditShippingMethod(false);
+                                });
+
+                                function toggleEditShippingMethod(editmode) {
+                                    if (editmode) {
+                                        $('#lblShippingMethod').hide();
+                                        $('#divShippingMethod').show();
+                                        $('#btnEditShippingMethod').hide();
+                                        $('#btnSaveShippingMethod').show();
+                                        $('#btnCancelShippingMethod').show();
+                                    } else {
+                                        $('#lblShippingMethod').show();
+                                        $('#divShippingMethod').hide();
+                                        $('#btnEditShippingMethod').show();
+                                        $('#btnSaveShippingMethod').hide();
+                                        $('#btnCancelShippingMethod').hide();
+                                    }
+                                }
+                            </script>
+                            <div class="input-group input-group-short">
+                                <div id="lblShippingMethod" class="input-group-text">
+                                    @Html.YStoryDisplayFor(model => model.ShippingMethod)
+                                </div>
+                                <div id="divShippingMethod">@Html.YStoryEditorFor(model => model.ShippingMethod)</div>
+                                <span class="input-group-btn">
+                                    <button type="submit" onclick="toggleEditShippingMethod(true);return false;" id="btnEditShippingMethod" class="btn btn-primary">
+                                        @T("Admin.Common.Edit")
+                                    </button>
+
+                                    <button type="submit" id="btnSaveShippingMethod" name="save-shipping-method" class="btn btn-primary">
+                                        @T("Admin.Common.Save")
+                                    </button>
+                                    @Html.ActionConfirmation("btnSaveShippingMethod")
+
+                                    <button type="submit" onclick="toggleEditShippingMethod(false);return false;" id="btnCancelShippingMethod" class="btn bg-teal">
+                                        @T("Admin.Common.Cancel")
+                                    </button>
+                                </span>
+                            </div>
+                        }
+                        else
+                        {
+                            <div id="lblShippingMethod">
+                                @Html.YStoryDisplayFor(model => model.ShippingMethod)
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                @if (!Model.IsLoggedInAsContributor)
+                {
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.ShippingStatus)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryDisplayFor(model => model.ShippingStatus)
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                @T("Admin.Subscriptions.Shipments")
+            </div>
+            <div class="panel-body">
+                <div id="shipments-grid"></div>
+
+                <script>
+                    $(document).ready(function () {
+                        $("#shipments-grid").kendoGrid({
+                            dataSource: {
+                                type: "json",
+                                transport: {
+                                    read: {
+                                        url: "@Html.Raw(Url.Action("ShipmentsBySubscription", "Subscription", new {subscriptionId = Model.Id}))",
+                                        type: "POST",
+                                        dataType: "json",
+                                        data: addAntiForgeryToken
+                                    }
+                                },
+                                schema: {
+                                    data: "Data",
+                                    total: "Total",
+                                    errors: "Errors"
+                                },
+                                error: function (e) {
+                                    display_kendoui_grid_error(e);
+                                    // Cancel the changes
+                                    this.cancelChanges();
+                                },
+                                serverPaging: true,
+                                serverFiltering: true,
+                                serverSorting: true
+                            },
+                            pageable: {
+                                refresh: true,
+                                numeric: false,
+                                previousNext: false,
+                                info: false,
+                                @Html.Partial("_GridPagerMessages")
+                            },
+                            //details grid
+                            detailInit: detailInit,
+                            scrollable: false,
+                            columns: [
+                                {
+                                    field: "Id",
+                                    title: "@T("Admin.Subscriptions.Shipments.ID")",
+                                    width: 50
+                                }, {
+                                    field: "CustomSubscriptionNumber",
+                                    title: "@T("Admin.Subscriptions.Shipments.CustomSubscriptionNumber")",
+                                    width: 100
+                                }, {
+                                    field: "TrackingNumber",
+                                    title: "@T("Admin.Subscriptions.Shipments.TrackingNumber")",
+                                    width: 100
+                                }, {
+                                    field: "TotalWeight",
+                                    title: "@T("Admin.Subscriptions.Shipments.TotalWeight")",
+                                    width: 100
+                                }, {
+                                    field: "ShippedDate",
+                                    title: "@T("Admin.Subscriptions.Shipments.ShippedDate")",
+                                    width: 200,
+                                    type: "date",
+                                    format: "{0:G}"
+                                }, {
+                                    field: "DeliveryDate",
+                                    title: "@T("Admin.Subscriptions.Shipments.DeliveryDate")",
+                                    width: 200,
+                                    type: "date",
+                                    format: "{0:G}"
+                                }, {
+                                    field: "Id",
+                                    title: "@T("Admin.Common.View")",
+                                    width: 50,
+                                    headerAttributes: { style: "text-align:center" },
+                                    attributes: { style: "text-align:center" },
+                                    template: '<a class="btn btn-default" href="@Url.Content("~/Admin/Subscription/ShipmentDetails/")#=Id#"><i class="fa fa-eye"></i>@T("Admin.Common.View")</a>'
+                                }
+                            ]
+                        });
+                    });
+
+                    //details grid
+                    function detailInit(e) {
+                        $("<div/>").appendTo(e.detailCell).kendoGrid({
+                            dataSource: {
+                                type: "json",
+                                transport: {
+                                    read: {
+                                        url: "@Html.Raw(Url.Action("ShipmentsItemsByShipmentId", "Subscription"))?shipmentId=" + e.data.Id,
+                                        type: "POST",
+                                        dataType: "json",
+                                        data: addAntiForgeryToken
+                                    }
+                                },
+                                schema: {
+                                    data: "Data",
+                                    total: "Total",
+                                    errors: "Errors"
+                                },
+                                error: function (e) {
+                                    display_kendoui_grid_error(e);
+                                    // Cancel the changes
+                                    this.cancelChanges();
+                                },
+                                serverPaging: true,
+                                serverFiltering: true,
+                                serverSorting: true
+                            },
+                            scrollable: false,
+                            sortable: true,
+                            pageable: {
+                                refresh: true,
+                                numeric: false,
+                                previousNext: false,
+                                info: false,
+                                @Html.Partial("_GridPagerMessages")
+                            },
+                            columns: [
+                                {
+                                    field: "ArticleName",
+                                    title: "@T("Admin.Subscriptions.Shipments.Articles.ArticleName")",
+                                    width: 400
+                                }, {
+                                    field: "ShippedFromWarehouse",
+                                    title: "@T("Admin.Subscriptions.Shipments.Articles.Warehouse")",
+                                    width: 150
+                                }, {
+                                    field: "QuantityInThisShipment",
+                                    title: "@T("Admin.Subscriptions.Shipments.Articles.QtyShipped")",
+                                    width: 150
+                                }, {
+                                    field: "ItemWeight",
+                                    title: "@T("Admin.Subscriptions.Shipments.Articles.ItemWeight")",
+                                    width: 150
+                                }, {
+                                    field: "ItemDimensions",
+                                    title: "@T("Admin.Subscriptions.Shipments.Articles.ItemDimensions")",
+                                    width: 150
+                                }
+                            ]
+                        });
+                    }
+                </script>
+            </div>
+
+            @if (Model.CanAddNewShipments)
+            {
+                <div class="panel-footer">
+                    <button type="submit" id="btnAddNewShipment" name="btnAddNewShipment" onclick="javascript:setLocation('@(Url.Action("AddShipment", "Subscription", new {subscriptionId = Model.Id}))'); return false;" class="btn btn-primary">
+                        @T("Admin.Subscriptions.Shipments.AddNew")
+                    </button>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="panel panel-default">
+            <div class="panel-body">
+                @T("Admin.Subscriptions.ShippingInfo.NotRequired")
+            </div>
+        </div>
+    }
+</div>

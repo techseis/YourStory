@@ -1,0 +1,115 @@
+﻿@model ArticleDetailsModel
+@using YStory.Core.Domain.Seo;
+@using YStory.Core.Infrastructure;
+@using YStory.Web.Models.Catalog;
+@{
+    Layout = "~/Views/Shared/_ColumnsOne.cshtml";
+
+    //title
+    Html.AddTitleParts(!String.IsNullOrEmpty(Model.MetaTitle) ? Model.MetaTitle : Model.Name);
+    //meta
+    Html.AddMetaDescriptionParts(Model.MetaDescription);
+    Html.AddMetaKeywordParts(Model.MetaKeywords);
+    //page class
+    Html.AppendPageCssClassParts("html-article-details-page");
+
+    var seoSettings = EngineContext.Current.Resolve<SeoSettings>();
+
+    //canonical URL
+    if (seoSettings.CanonicalUrlsEnabled)
+    {
+        var articleUrl = Url.RouteUrl("Article", new { SeName = Model.SeName }, this.Request.Url.Scheme);
+        Html.AddCanonicalUrlParts(articleUrl);
+    }
+
+    //open graph META tags
+    if (seoSettings.OpenGraphMetaTags)
+    {
+        Html.AddHeadCustomParts("<meta property=\"og:type\" content=\"article\" />");
+        Html.AddHeadCustomParts("<meta property=\"og:title\" content=\"" + Html.Encode(Model.Name) + "\" />");
+        Html.AddHeadCustomParts("<meta property=\"og:description\" content=\"" + Html.Encode(YStory.Core.Html.HtmlHelper.StripTags(Model.MetaDescription)) + "\" />");
+        Html.AddHeadCustomParts("<meta property=\"og:image\" content=\"" + Model.DefaultPictureModel.ImageUrl + "\" />");
+        Html.AddHeadCustomParts("<meta property=\"og:url\" content=\"" + Request.Url.AbsoluteUri + "\" />");
+        Html.AddHeadCustomParts("<meta property=\"og:site_name\" content=\"" + Html.Encode(Model.CurrentStoreName) + "\" />");
+    }
+
+    //Twitter META tags
+    if (seoSettings.TwitterMetaTags)
+    {
+        Html.AddHeadCustomParts("<meta property=\"twitter:card\" content=\"summary\" />");
+        Html.AddHeadCustomParts("<meta property=\"twitter:site\" content=\"" + Html.Encode(Model.CurrentStoreName) + "\" />");
+        Html.AddHeadCustomParts("<meta property=\"twitter:title\" content=\"" + Html.Encode(Model.Name) + "\" />");
+        Html.AddHeadCustomParts("<meta property=\"twitter:description\" content=\"" + Html.Encode(YStory.Core.Html.HtmlHelper.StripTags(Model.MetaDescription)) + "\" />");
+        Html.AddHeadCustomParts("<meta property=\"twitter:image\" content=\"" + Model.DefaultPictureModel.ImageUrl + "\" />");
+        Html.AddHeadCustomParts("<meta property=\"twitter:url\" content=\"" + Request.Url.AbsoluteUri + "\" />");
+    }
+}
+<!--article breadcrumb-->
+@section Breadcrumb
+{
+    @Html.Partial("_ArticleBreadcrumb", Model.Breadcrumb)
+}
+@Html.Widget("articledetails_after_breadcrumb", Model.Id)
+<div class="page article-details-page">
+    <div class="page-body">
+        @Html.Widget("articledetails_top", Model.Id)
+        @using (Html.BeginRouteForm("Article", new { SeName = Model.SeName }, FormMethod.Post, new { id = "article-details-form" }))
+        {
+            <div itemscope itemtype="http://schema.org/Article" data-articleid="@Model.Id">
+                <div class="article-essential">
+                    @Html.Widget("articledetails_before_pictures", Model.Id)
+                    <!--article pictures-->
+                    @Html.Partial("_ArticleDetailsPictures", Model)
+                    @Html.Widget("articledetails_after_pictures", Model.Id)
+                    <div class="overview">
+                        @Html.Partial("_Discontinued", Model)
+                        <div class="article-name">
+                            <h1 itemprop="name">
+                                @Model.Name
+                            </h1>
+                        </div>
+                        @if (!String.IsNullOrEmpty(Model.ShortDescription))
+                        {
+                            <div class="short-description">
+                                @Html.Raw(Model.ShortDescription)
+                            </div>
+                        }
+                        @Html.Widget("articledetails_overview_top", Model.Id)
+                        <!--article reviews-->
+                        @Html.Partial("_ArticleReviewOverview", Model.ArticleReviewOverview)
+                        <!--publishers-->
+                        @Html.Partial("_ArticlePublishers", Model.ArticlePublishers)
+                        
+                       
+                     
+                    
+                        <!--attributes-->
+                        @{
+                            var dataDictAttributes = new ViewDataDictionary();
+                            dataDictAttributes.TemplateInfo.HtmlFieldPrefix = string.Format("attributes_{0}", Model.Id);
+                            @Html.Partial("_ArticleAttributes", Model.ArticleAttributes, dataDictAttributes)
+                        }
+                        
+                        
+                        @Html.Partial("_ShareButton", Model)
+                        @Html.Widget("articledetails_overview_bottom", Model.Id)
+                    </div>
+                    @if (!String.IsNullOrEmpty(Model.FullDescription))
+                    {
+                        <div class="full-description" itemprop="description">
+                            @Html.Raw(Model.FullDescription)
+                        </div>
+                    }
+                </div>
+                @Html.Widget("articledetails_before_collateral", Model.Id)
+                <div class="article-collateral">
+                    @Html.Partial("_ArticleSpecifications", Model.ArticleSpecifications)
+                    @Html.Partial("_ArticleTags", Model.ArticleTags)
+                </div>
+                @Html.Action("ArticlesAlsoPurchased", "Article", new { articleId = Model.Id })
+                @Html.Action("RelatedArticles", "Article", new { articleId = Model.Id })
+            </div>
+        }
+        @Html.Widget("articledetails_bottom", Model.Id)
+    </div>
+</div>

@@ -1,0 +1,8 @@
+﻿@model ArticleDetailsModel
+@using YStory.Web.Models.Catalog;
+@if (Model.DisplayDiscontinuedMessage)
+{
+    <div class="discontinued-article">
+        <h4>@T("Articles.Discontinued")</h4>
+    </div>
+}

@@ -1,0 +1,960 @@
+﻿@model CatalogSettingsModel
+
+@{
+    //page title
+    ViewBag.Title = T("Admin.Configuration.Settings.Catalog").Text;
+    //active menu item (system name)
+    Html.SetActiveMenuItemSystemName("Catalog settings");
+}
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            @T("Admin.Configuration.Settings.Catalog")
+        </h1>
+        <div class="pull-right">
+            <button type="submit" name="save" class="btn bg-blue">
+                <i class="fa fa-floppy-o"></i>
+                @T("Admin.Common.Save")
+            </button>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="form-horizontal">
+            @Html.Action("StoreScopeConfiguration", "Setting")
+            @Html.Action("Mode", "Setting")
+            @Html.ValidationSummary(false)
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        @T("Admin.Configuration.Settings.Catalog.BlockTitle.Search")
+                    </div>
+                    <div class="panel-body">
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.ArticleSearchAutoCompleteEnabled_OverrideForStore, model => model.ArticleSearchAutoCompleteEnabled, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.ArticleSearchAutoCompleteEnabled)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.ArticleSearchAutoCompleteEnabled)
+                                @Html.ValidationMessageFor(model => model.ArticleSearchAutoCompleteEnabled)
+                            </div>
+                        </div>
+                        <div class="form-group advanced-setting" id="pnlArticleSearchAutoCompleteNumberOfArticles">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.ArticleSearchAutoCompleteNumberOfArticles_OverrideForStore, model => model.ArticleSearchAutoCompleteNumberOfArticles, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.ArticleSearchAutoCompleteNumberOfArticles)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.ArticleSearchAutoCompleteNumberOfArticles)
+                                @Html.ValidationMessageFor(model => model.ArticleSearchAutoCompleteNumberOfArticles)
+                            </div>
+                        </div>
+                        <div class="form-group advanced-setting" id="pnlShowArticleImagesInSearchAutoComplete">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.ShowArticleImagesInSearchAutoComplete_OverrideForStore, model => model.ShowArticleImagesInSearchAutoComplete, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.ShowArticleImagesInSearchAutoComplete)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.ShowArticleImagesInSearchAutoComplete)
+                                @Html.ValidationMessageFor(model => model.ShowArticleImagesInSearchAutoComplete)
+                            </div>
+                        </div>
+                        <div class="form-group advanced-setting">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.ArticleSearchTermMinimumLength_OverrideForStore, model => model.ArticleSearchTermMinimumLength, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.ArticleSearchTermMinimumLength)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.ArticleSearchTermMinimumLength)
+                                @Html.ValidationMessageFor(model => model.ArticleSearchTermMinimumLength)
+                            </div>
+                        </div>
+                        <div class="form-group advanced-setting">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.SearchPageAllowCustomersToSelectPageSize_OverrideForStore, model => model.SearchPageAllowCustomersToSelectPageSize, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.SearchPageAllowCustomersToSelectPageSize)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.SearchPageAllowCustomersToSelectPageSize)
+                                @Html.ValidationMessageFor(model => model.SearchPageAllowCustomersToSelectPageSize)
+                            </div>
+                        </div>
+                        <div class="form-group advanced-setting" id="pnlSearchPageArticlesPerPage">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.SearchPageArticlesPerPage_OverrideForStore, model => model.SearchPageArticlesPerPage, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.SearchPageArticlesPerPage)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.SearchPageArticlesPerPage)
+                                @Html.ValidationMessageFor(model => model.SearchPageArticlesPerPage)
+                            </div>
+                        </div>
+                        <div class="form-group advanced-setting" id="pnlSearchPagePageSizeOptions">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.ArticlesByTagPageSizeOptions_OverrideForStore, model => model.SearchPagePageSizeOptions, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.SearchPagePageSizeOptions)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.SearchPagePageSizeOptions)
+                                @Html.ValidationMessageFor(model => model.SearchPagePageSizeOptions)
+                            </div>
+                        </div>
+                    </div>
+                    <script type="text/javascript">
+                        $(document).ready(function () {
+                            $("#@Html.FieldIdFor(model => model.SearchPageAllowCustomersToSelectPageSize)").click(toggleSearchPagePageSize);
+                            $("#@Html.FieldIdFor(model => model.ArticleSearchAutoCompleteEnabled)").click(toggleArticleSearchAutoComplete);
+
+                            toggleSearchPagePageSize();
+                            toggleArticleSearchAutoComplete();
+                        });
+
+                        function toggleSearchPagePageSize() {
+                            if ($('#@Html.FieldIdFor(model => model.SearchPageAllowCustomersToSelectPageSize)').is(':checked')) {
+                                $('#pnlSearchPageArticlesPerPage').hide();
+                                $('#pnlSearchPagePageSizeOptions').show();
+                            } else {
+                                $('#pnlSearchPageArticlesPerPage').show();
+                                $('#pnlSearchPagePageSizeOptions').hide();
+                            }
+                        }
+
+                        function toggleArticleSearchAutoComplete() {
+                            if ($('#@Html.FieldIdFor(model => model.ArticleSearchAutoCompleteEnabled)').is(':checked')) {
+                                $('#pnlArticleSearchAutoCompleteNumberOfArticles').show();
+                                $('#pnlShowArticleImagesInSearchAutoComplete').show();
+                            } else {
+                                $('#pnlArticleSearchAutoCompleteNumberOfArticles').hide();
+                                $('#pnlShowArticleImagesInSearchAutoComplete').hide();
+                            }
+                        }
+                    </script>
+                </div>
+
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        @T("Admin.Configuration.Settings.Catalog.BlockTitle.ArticleReviews")
+                    </div>
+                    <div class="panel-body">
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.ArticleReviewsMustBeApproved_OverrideForStore, model => model.ArticleReviewsMustBeApproved, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.ArticleReviewsMustBeApproved)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.ArticleReviewsMustBeApproved)
+                                @Html.ValidationMessageFor(model => model.ArticleReviewsMustBeApproved)
+                            </div>
+                        </div>
+                        <div class="form-group advanced-setting">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.AllowAnonymousUsersToReviewArticle_OverrideForStore, model => model.AllowAnonymousUsersToReviewArticle, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.AllowAnonymousUsersToReviewArticle)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.AllowAnonymousUsersToReviewArticle)
+                                @Html.ValidationMessageFor(model => model.AllowAnonymousUsersToReviewArticle)
+                            </div>
+                        </div>
+                        <div class="form-group advanced-setting">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.ArticleReviewPossibleOnlyAfterPurchasing_OverrideForStore, model => model.ArticleReviewPossibleOnlyAfterPurchasing, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.ArticleReviewPossibleOnlyAfterPurchasing)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.ArticleReviewPossibleOnlyAfterPurchasing)
+                                @Html.ValidationMessageFor(model => model.ArticleReviewPossibleOnlyAfterPurchasing)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.NotifyStoreOwnerAboutNewArticleReviews_OverrideForStore, model => model.NotifyStoreOwnerAboutNewArticleReviews, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.NotifyStoreOwnerAboutNewArticleReviews)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.NotifyStoreOwnerAboutNewArticleReviews)
+                                @Html.ValidationMessageFor(model => model.NotifyStoreOwnerAboutNewArticleReviews)
+                            </div>
+                        </div>
+                        <div class="form-group advanced-setting">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.ShowArticleReviewsPerStore_OverrideForStore, model => model.ShowArticleReviewsPerStore, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.ShowArticleReviewsPerStore)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.ShowArticleReviewsPerStore)
+                                @Html.ValidationMessageFor(model => model.ShowArticleReviewsPerStore)
+                            </div>
+                        </div>
+                        <div class="form-group advanced-setting">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.ShowArticleReviewsOnAccountPage_OverrideForStore, model => model.ShowArticleReviewsTabOnAccountPage, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.ShowArticleReviewsTabOnAccountPage)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.ShowArticleReviewsTabOnAccountPage)
+                                @Html.ValidationMessageFor(model => model.ShowArticleReviewsTabOnAccountPage)
+                            </div>
+                        </div>
+                        <div class="form-group advanced-setting" id="pnlArticleReviewsPageSizeOnAccountPage">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.ArticleReviewsPageSizeOnAccountPage_OverrideForStore, model => model.ArticleReviewsPageSizeOnAccountPage, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.ArticleReviewsPageSizeOnAccountPage)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.ArticleReviewsPageSizeOnAccountPage)
+                                @Html.ValidationMessageFor(model => model.ArticleReviewsPageSizeOnAccountPage)
+                            </div>
+                        </div>
+                    </div>
+                    <script type="text/javascript">
+                        $(document).ready(function () {
+                            $("#@Html.FieldIdFor(model => model.ShowArticleReviewsTabOnAccountPage)").click(toggleArticleReviewsPageSizeOnAccountPage);
+
+                            toggleArticleReviewsPageSizeOnAccountPage();
+                        });
+
+                        function toggleArticleReviewsPageSizeOnAccountPage() {
+                            if ($('#@Html.FieldIdFor(model => model.ShowArticleReviewsTabOnAccountPage)').is(':checked')) {
+                                $('#pnlArticleReviewsPageSizeOnAccountPage').show();
+                            } else {
+                                $('#pnlArticleReviewsPageSizeOnAccountPage').hide();
+                            }
+                        }
+                    </script>
+                </div>
+
+                <div class="panel panel-default advanced-setting">
+                    <div class="panel-heading">
+                        @T("Admin.Configuration.Settings.Catalog.BlockTitle.Performance")
+                    </div>
+                    <div class="panel-body">
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.YStoryLabelFor(model => model.IgnoreAcl)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.IgnoreAcl)
+                                @Html.ValidationMessageFor(model => model.IgnoreAcl)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.YStoryLabelFor(model => model.IgnoreStoreLimitations)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.IgnoreStoreLimitations)
+                                @Html.ValidationMessageFor(model => model.IgnoreStoreLimitations)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.YStoryLabelFor(model => model.IgnoreDiscounts)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.IgnoreDiscounts)
+                                @Html.ValidationMessageFor(model => model.IgnoreDiscounts)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.YStoryLabelFor(model => model.IgnoreFeaturedArticles)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.IgnoreFeaturedArticles)
+                                @Html.ValidationMessageFor(model => model.IgnoreFeaturedArticles)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.YStoryLabelFor(model => model.CacheArticlePrices)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.CacheArticlePrices)
+                                @Html.ValidationMessageFor(model => model.CacheArticlePrices)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        @T("Admin.Configuration.Settings.Catalog.BlockTitle.Share")
+                    </div>
+                    <div class="panel-body">
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.ShowShareButton_OverrideForStore, model => model.ShowShareButton, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.ShowShareButton)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.ShowShareButton)
+                                @Html.ValidationMessageFor(model => model.ShowShareButton)
+                            </div>
+                        </div>
+                        <div class="form-group advanced-setting" id="pnlPageShareCode">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.PageShareCode_OverrideForStore, model => model.PageShareCode, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.PageShareCode)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryTextAreaFor(model => model.PageShareCode)
+                                @Html.ValidationMessageFor(model => model.PageShareCode)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.EmailAFriendEnabled_OverrideForStore, model => model.EmailAFriendEnabled, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.EmailAFriendEnabled)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.EmailAFriendEnabled)
+                                @Html.ValidationMessageFor(model => model.EmailAFriendEnabled)
+                            </div>
+                        </div>
+                        <div class="form-group advanced-setting" id="pnlAllowAnonymousUsersToEmailAFriend">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.AllowAnonymousUsersToEmailAFriend_OverrideForStore, model => model.AllowAnonymousUsersToEmailAFriend, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.AllowAnonymousUsersToEmailAFriend)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.AllowAnonymousUsersToEmailAFriend)
+                                @Html.ValidationMessageFor(model => model.AllowAnonymousUsersToEmailAFriend)
+                            </div>
+                        </div>
+                        <script type="text/javascript">
+                            $(document).ready(function () {
+                                $("#@Html.FieldIdFor(model => model.ShowShareButton)").click(togglePageShareCode);
+                                togglePageShareCode();
+                            });
+
+                            function togglePageShareCode() {
+                                if ($('#@Html.FieldIdFor(model => model.ShowShareButton)').is(':checked')) {
+                                    $('#pnlPageShareCode').show();
+                                } else {
+                                    $('#pnlPageShareCode').hide();
+                                }
+                            }
+                        </script>
+                    </div>
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        @T("Admin.Configuration.Settings.Catalog.BlockTitle.Compare")
+                    </div>
+                    <div class="panel-body">
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.CompareArticlesEnabled_OverrideForStore, model => model.CompareArticlesEnabled, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.CompareArticlesEnabled)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.CompareArticlesEnabled)
+                                @Html.ValidationMessageFor(model => model.CompareArticlesEnabled)
+                            </div>
+                        </div>
+                        <div class="form-group advanced-setting" id="pnlIncludeShortDescriptionInCompareArticles">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.IncludeShortDescriptionInCompareArticles_OverrideForStore, model => model.IncludeShortDescriptionInCompareArticles, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.IncludeShortDescriptionInCompareArticles)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.IncludeShortDescriptionInCompareArticles)
+                                @Html.ValidationMessageFor(model => model.IncludeShortDescriptionInCompareArticles)
+                            </div>
+                        </div>
+                        <div class="form-group advanced-setting" id="IncludeFullDescriptionInCompareArticles">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.IncludeFullDescriptionInCompareArticles_OverrideForStore, model => model.IncludeFullDescriptionInCompareArticles, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.IncludeFullDescriptionInCompareArticles)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.IncludeFullDescriptionInCompareArticles)
+                                @Html.ValidationMessageFor(model => model.IncludeFullDescriptionInCompareArticles)
+                            </div>
+                        </div>
+                        <script type="text/javascript">
+                            $(document).ready(function () {
+                                $("#@Html.FieldIdFor(model => model.CompareArticlesEnabled)").click(toggleCompareArticlesEnabled);
+                                toggleCompareArticlesEnabled();
+                            });
+
+                            function toggleCompareArticlesEnabled() {
+                                if ($('#@Html.FieldIdFor(model => model.CompareArticlesEnabled)').is(':checked')) {
+                                    $('#pnlIncludeShortDescriptionInCompareArticles').show();
+                                    $('#IncludeFullDescriptionInCompareArticles').show();
+                                } else {
+                                    $('#pnlIncludeShortDescriptionInCompareArticles').hide();
+                                    $('#IncludeFullDescriptionInCompareArticles').hide();
+                                }
+                            }
+                        </script>
+                    </div>
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        @T("Admin.Configuration.Settings.Catalog.BlockTitle.AdditionalSections")
+                    </div>
+                    <div class="panel-body">
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.ShowBestsellersOnHomepage_OverrideForStore, model => model.ShowBestsellersOnHomepage, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.ShowBestsellersOnHomepage)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.ShowBestsellersOnHomepage)
+                                @Html.ValidationMessageFor(model => model.ShowBestsellersOnHomepage)
+                            </div>
+                        </div>
+                        <div class="form-group advanced-setting" id="pnlNumberOfBestsellersOnHomepage">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.NumberOfBestsellersOnHomepage_OverrideForStore, model => model.NumberOfBestsellersOnHomepage, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.NumberOfBestsellersOnHomepage)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.NumberOfBestsellersOnHomepage)
+                                @Html.ValidationMessageFor(model => model.NumberOfBestsellersOnHomepage)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.ArticlesAlsoPurchasedEnabled_OverrideForStore, model => model.ArticlesAlsoPurchasedEnabled, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.ArticlesAlsoPurchasedEnabled)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.ArticlesAlsoPurchasedEnabled)
+                                @Html.ValidationMessageFor(model => model.ArticlesAlsoPurchasedEnabled)
+                            </div>
+                        </div>
+                        <div class="form-group advanced-setting" id="pnlArticlesAlsoPurchasedNumber">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.ArticlesAlsoPurchasedNumber_OverrideForStore, model => model.ArticlesAlsoPurchasedNumber, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.ArticlesAlsoPurchasedNumber)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.ArticlesAlsoPurchasedNumber)
+                                @Html.ValidationMessageFor(model => model.ArticlesAlsoPurchasedNumber)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.RecentlyViewedArticlesEnabled_OverrideForStore, model => model.RecentlyViewedArticlesEnabled, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.RecentlyViewedArticlesEnabled)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.RecentlyViewedArticlesEnabled)
+                                @Html.ValidationMessageFor(model => model.RecentlyViewedArticlesEnabled)
+                            </div>
+                        </div>
+                        <div class="form-group advanced-setting" id="pnlRecentlyViewedArticlesNumber">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.RecentlyViewedArticlesNumber_OverrideForStore, model => model.RecentlyViewedArticlesNumber, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.RecentlyViewedArticlesNumber)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.RecentlyViewedArticlesNumber)
+                                @Html.ValidationMessageFor(model => model.RecentlyViewedArticlesNumber)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.NewArticlesEnabled_OverrideForStore, model => model.NewArticlesEnabled, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.NewArticlesEnabled)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.NewArticlesEnabled)
+                                @Html.ValidationMessageFor(model => model.NewArticlesEnabled)
+                            </div>
+                        </div>
+                        <div class="form-group" id="pnlNewArticlesNumber">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.NewArticlesNumber_OverrideForStore, model => model.NewArticlesNumber, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.NewArticlesNumber)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.NewArticlesNumber)
+                                @Html.ValidationMessageFor(model => model.NewArticlesNumber)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel panel-default advanced-setting">
+                    <div class="panel-heading">
+                        @T("Admin.Configuration.Settings.Catalog.BlockTitle.ArticleFields")
+                    </div>
+                    <div class="panel-body">
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.ShowSkuOnArticleDetailsPage_OverrideForStore, model => model.ShowSkuOnArticleDetailsPage, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.ShowSkuOnArticleDetailsPage)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.ShowSkuOnArticleDetailsPage)
+                                @Html.ValidationMessageFor(model => model.ShowSkuOnArticleDetailsPage)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.ShowSkuOnCatalogPages_OverrideForStore, model => model.ShowSkuOnCatalogPages, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.ShowSkuOnCatalogPages)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.ShowSkuOnCatalogPages)
+                                @Html.ValidationMessageFor(model => model.ShowSkuOnCatalogPages)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.ShowGtin_OverrideForStore, model => model.ShowGtin, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.ShowGtin)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.ShowGtin)
+                                @Html.ValidationMessageFor(model => model.ShowGtin)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.ShowPublisherPartNumber_OverrideForStore, model => model.ShowPublisherPartNumber, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.ShowPublisherPartNumber)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.ShowPublisherPartNumber)
+                                @Html.ValidationMessageFor(model => model.ShowPublisherPartNumber)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel panel-default advanced-setting">
+                    <div class="panel-heading">
+                        @T("Admin.Configuration.Settings.Catalog.BlockTitle.ArticlePage")
+                    </div>
+                    <div class="panel-body">
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.ShowFreeShippingNotification_OverrideForStore, model => model.ShowFreeShippingNotification, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.ShowFreeShippingNotification)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.ShowFreeShippingNotification)
+                                @Html.ValidationMessageFor(model => model.ShowFreeShippingNotification)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.AllowViewUnpublishedArticlePage_OverrideForStore, model => model.AllowViewUnpublishedArticlePage, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.AllowViewUnpublishedArticlePage)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.AllowViewUnpublishedArticlePage)
+                                @Html.ValidationMessageFor(model => model.AllowViewUnpublishedArticlePage)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.DisplayDiscontinuedMessageForUnpublishedArticles_OverrideForStore, model => model.DisplayDiscontinuedMessageForUnpublishedArticles, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.DisplayDiscontinuedMessageForUnpublishedArticles)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.DisplayDiscontinuedMessageForUnpublishedArticles)
+                                @Html.ValidationMessageFor(model => model.DisplayDiscontinuedMessageForUnpublishedArticles)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel panel-default advanced-setting">
+                    <div class="panel-heading">
+                        @T("Admin.Configuration.Settings.Catalog.BlockTitle.CatalogPages")
+                    </div>
+                    <div class="panel-body">
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.AllowArticleViewModeChanging_OverrideForStore, model => model.AllowArticleViewModeChanging, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.AllowArticleViewModeChanging)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.AllowArticleViewModeChanging)
+                                @Html.ValidationMessageFor(model => model.AllowArticleViewModeChanging)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.ShowArticlesFromSubcategories_OverrideForStore, model => model.ShowArticlesFromSubcategories, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.ShowArticlesFromSubcategories)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.ShowArticlesFromSubcategories)
+                                @Html.ValidationMessageFor(model => model.ShowArticlesFromSubcategories)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.ShowCategoryArticleNumber_OverrideForStore, model => model.ShowCategoryArticleNumber, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.ShowCategoryArticleNumber)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.ShowCategoryArticleNumber)
+                                @Html.ValidationMessageFor(model => model.ShowCategoryArticleNumber)
+                            </div>
+                        </div>
+                        <div class="form-group" id="pnlShowCategoryArticleNumberIncludingSubcategories">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.ShowCategoryArticleNumberIncludingSubcategories_OverrideForStore, model => model.ShowCategoryArticleNumberIncludingSubcategories, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.ShowCategoryArticleNumberIncludingSubcategories)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.ShowCategoryArticleNumberIncludingSubcategories)
+                                @Html.ValidationMessageFor(model => model.ShowCategoryArticleNumberIncludingSubcategories)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.CategoryBreadcrumbEnabled_OverrideForStore, model => model.CategoryBreadcrumbEnabled, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.CategoryBreadcrumbEnabled)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.CategoryBreadcrumbEnabled)
+                                @Html.ValidationMessageFor(model => model.CategoryBreadcrumbEnabled)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.PublishersBlockItemsToDisplay_OverrideForStore, model => model.PublishersBlockItemsToDisplay, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.PublishersBlockItemsToDisplay)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.PublishersBlockItemsToDisplay)
+                                @Html.ValidationMessageFor(model => model.PublishersBlockItemsToDisplay)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel panel-default advanced-setting">
+                    <div class="panel-heading">
+                        @T("Admin.Configuration.Settings.Catalog.BlockTitle.Tags")
+                    </div>
+                    <div class="panel-body">
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.NumberOfArticleTags_OverrideForStore, model => model.NumberOfArticleTags, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.NumberOfArticleTags)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.NumberOfArticleTags)
+                                @Html.ValidationMessageFor(model => model.NumberOfArticleTags)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.ArticlesByTagAllowCustomersToSelectPageSize_OverrideForStore, model => model.ArticlesByTagAllowCustomersToSelectPageSize, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.ArticlesByTagAllowCustomersToSelectPageSize)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.ArticlesByTagAllowCustomersToSelectPageSize)
+                                @Html.ValidationMessageFor(model => model.ArticlesByTagAllowCustomersToSelectPageSize)
+                            </div>
+                        </div>
+                        <div class="form-group" id="pnlArticlesByTagPageSize">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.ArticlesByTagPageSize_OverrideForStore, model => model.ArticlesByTagPageSize, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.ArticlesByTagPageSize)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.ArticlesByTagPageSize)
+                                @Html.ValidationMessageFor(model => model.ArticlesByTagPageSize)
+                            </div>
+                        </div>
+                        <div class="form-group" id="pnlArticlesByTagPageSizeOptions">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.ArticlesByTagPageSizeOptions_OverrideForStore, model => model.ArticlesByTagPageSizeOptions, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.ArticlesByTagPageSizeOptions)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.ArticlesByTagPageSizeOptions)
+                                @Html.ValidationMessageFor(model => model.ArticlesByTagPageSizeOptions)
+                            </div>
+                        </div>
+                    </div>
+
+                    <script type="text/javascript">
+                        $(document).ready(function () {
+                            $("#@Html.FieldIdFor(model => model.ShowCategoryArticleNumber)").click(toggleShowCategoryArticleNumberIncludingSubcategories);
+                            $("#@Html.FieldIdFor(model => model.EmailAFriendEnabled)").click(toggleEmailAFriend);
+                            $("#@Html.FieldIdFor(model => model.RecentlyViewedArticlesEnabled)").click(toggleRecentlyViewedArticles);
+                            $("#@Html.FieldIdFor(model => model.NewArticlesEnabled)").click(toggleNewArticles);
+                            $("#@Html.FieldIdFor(model => model.ShowBestsellersOnHomepage)").click(toggleBestsellersOnHomepage);
+                            $("#@Html.FieldIdFor(model => model.ArticlesAlsoPurchasedEnabled)").click(toggleArticlesAlsoPurchasedNumber);
+                            $("#@Html.FieldIdFor(model => model.ArticlesByTagAllowCustomersToSelectPageSize)").click(toggleArticlesByTagPageSize);
+
+                            toggleShowCategoryArticleNumberIncludingSubcategories();
+                            toggleEmailAFriend();
+                            toggleRecentlyViewedArticles();
+                            toggleNewArticles();
+                            toggleBestsellersOnHomepage();
+                            toggleArticlesAlsoPurchasedNumber();
+                            toggleArticlesByTagPageSize();
+                        });
+
+                        function toggleShowCategoryArticleNumberIncludingSubcategories() {
+                            if ($('#@Html.FieldIdFor(model => model.ShowCategoryArticleNumber)').is(':checked')) {
+                                $('#pnlShowCategoryArticleNumberIncludingSubcategories').show();
+                            } else {
+                                $('#pnlShowCategoryArticleNumberIncludingSubcategories').hide();
+                            }
+                        }
+
+                        function toggleEmailAFriend() {
+                            if ($('#@Html.FieldIdFor(model => model.EmailAFriendEnabled)').is(':checked')) {
+                                $('#pnlAllowAnonymousUsersToEmailAFriend').show();
+                            } else {
+                                $('#pnlAllowAnonymousUsersToEmailAFriend').hide();
+                            }
+                        }
+
+                        function toggleRecentlyViewedArticles() {
+                            if ($('#@Html.FieldIdFor(model => model.RecentlyViewedArticlesEnabled)').is(':checked')) {
+                                $('#pnlRecentlyViewedArticlesNumber').show();
+                            } else {
+                                $('#pnlRecentlyViewedArticlesNumber').hide();
+                            }
+                        }
+
+                        function toggleNewArticles() {
+                            if ($('#@Html.FieldIdFor(model => model.NewArticlesEnabled)').is(':checked')) {
+                                $('#pnlNewArticlesNumber').show();
+                            } else {
+                                $('#pnlNewArticlesNumber').hide();
+                            }
+                        }
+
+                        function toggleBestsellersOnHomepage() {
+                            if ($('#@Html.FieldIdFor(model => model.ShowBestsellersOnHomepage)').is(':checked')) {
+                                $('#pnlNumberOfBestsellersOnHomepage').show();
+                            } else {
+                                $('#pnlNumberOfBestsellersOnHomepage').hide();
+                            }
+                        }
+
+                        function toggleArticlesAlsoPurchasedNumber() {
+                            if ($('#@Html.FieldIdFor(model => model.ArticlesAlsoPurchasedEnabled)').is(':checked')) {
+                                $('#pnlArticlesAlsoPurchasedNumber').show();
+                            } else {
+                                $('#pnlArticlesAlsoPurchasedNumber').hide();
+                            }
+                        }
+
+                        function toggleArticlesByTagPageSize() {
+                            if ($('#@Html.FieldIdFor(model => model.ArticlesByTagAllowCustomersToSelectPageSize)').is(':checked')) {
+                                $('#pnlArticlesByTagPageSize').hide();
+                                $('#pnlArticlesByTagPageSizeOptions').show();
+                            } else {
+                                $('#pnlArticlesByTagPageSize').show();
+                                $('#pnlArticlesByTagPageSizeOptions').hide();
+                            }
+                        }
+
+                    </script>
+                </div>
+
+                <div class="panel panel-default advanced-setting">
+                    <div class="panel-heading">
+                        @T("Admin.Configuration.Settings.Catalog.BlockTitle.Tax")
+                    </div>
+                    <div class="panel-body">
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.DisplayTaxShippingInfoFooter_OverrideForStore, model => model.DisplayTaxShippingInfoFooter, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.DisplayTaxShippingInfoFooter)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.DisplayTaxShippingInfoFooter)
+                                @Html.ValidationMessageFor(model => model.DisplayTaxShippingInfoFooter)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.DisplayTaxShippingInfoArticleDetailsPage_OverrideForStore, model => model.DisplayTaxShippingInfoArticleDetailsPage, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.DisplayTaxShippingInfoArticleDetailsPage)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.DisplayTaxShippingInfoArticleDetailsPage)
+                                @Html.ValidationMessageFor(model => model.DisplayTaxShippingInfoArticleDetailsPage)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.DisplayTaxShippingInfoArticleBoxes_OverrideForStore, model => model.DisplayTaxShippingInfoArticleBoxes, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.DisplayTaxShippingInfoArticleBoxes)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.DisplayTaxShippingInfoArticleBoxes)
+                                @Html.ValidationMessageFor(model => model.DisplayTaxShippingInfoArticleBoxes)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.DisplayTaxShippingInfoShoppingCart_OverrideForStore, model => model.DisplayTaxShippingInfoShoppingCart, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.DisplayTaxShippingInfoShoppingCart)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.DisplayTaxShippingInfoShoppingCart)
+                                @Html.ValidationMessageFor(model => model.DisplayTaxShippingInfoShoppingCart)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.DisplayTaxShippingInfoWishlist_OverrideForStore, model => model.DisplayTaxShippingInfoWishlist, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.DisplayTaxShippingInfoWishlist)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.DisplayTaxShippingInfoWishlist)
+                                @Html.ValidationMessageFor(model => model.DisplayTaxShippingInfoWishlist)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.DisplayTaxShippingInfoSubscriptionDetailsPage_OverrideForStore, model => model.DisplayTaxShippingInfoSubscriptionDetailsPage, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.DisplayTaxShippingInfoSubscriptionDetailsPage)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.DisplayTaxShippingInfoSubscriptionDetailsPage)
+                                @Html.ValidationMessageFor(model => model.DisplayTaxShippingInfoSubscriptionDetailsPage)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel panel-default advanced-setting">
+                    <div class="panel-heading">
+                        @T("Admin.Configuration.Settings.Catalog.BlockTitle.ExportImport")
+                    </div>
+                    <div class="panel-body">
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.ExportImportArticleAttributes_OverrideForStore, model => model.ExportImportArticleAttributes, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.ExportImportArticleAttributes)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.ExportImportArticleAttributes)
+                                @Html.ValidationMessageFor(model => model.ExportImportArticleAttributes)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel panel-default advanced-setting">
+                    <div class="panel-heading">
+                        @T("Admin.Configuration.Settings.Catalog.BlockTitle.ArticleSorting")
+                    </div>
+                    <div class="panel-body">
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.AllowArticleSorting_OverrideForStore, model => model.AllowArticleSorting, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.AllowArticleSorting)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.AllowArticleSorting)
+                                @Html.ValidationMessageFor(model => model.AllowArticleSorting)
+                            </div>
+                        </div>
+                        <div id="sortoptions-grid"></div>
+
+                        <script>
+                            $(document).ready(function () {
+                                $("#sortoptions-grid").kendoGrid({
+                                    dataSource: {
+                                        type: "json",
+                                        transport: {
+                                            read: {
+                                                url: "@Html.Raw(Url.Action("SortOptionsList", "Setting"))",
+                                                type: "POST",
+                                                dataType: "json",
+                                                data: addAntiForgeryToken
+                                            },
+                                            update: {
+                                                url: "@Html.Raw(Url.Action("SortOptionUpdate", "Setting"))",
+                                                type: "POST",
+                                                dataType: "json",
+                                                data: addAntiForgeryToken
+                                            }
+                                        },
+                                        schema: {
+                                            data: "Data",
+                                            total: "Total",
+                                            errors: "Errors",
+                                            model: {
+                                                id: "Id",
+                                                fields: {
+                                                    Name: { editable: false, type: "string" },
+                                                    DisplaySubscription: { editable: true, type: "number" },
+                                                    IsActive: { editable: true, type: "boolean" }
+                                                }
+                                            }
+                                        },
+                                        requestEnd: function (e) {
+                                            if (e.type == "update") {
+                                                this.read();
+                                            }
+                                        },
+                                        error: function (e) {
+                                            display_kendoui_grid_error(e);
+                                            // Cancel the changes
+                                            this.cancelChanges();
+                                        },
+                                        serverPaging: true,
+                                        serverFiltering: true,
+                                        serverSorting: true
+                                    },
+                                    pageable: {
+                                        refresh: true,
+                                        numeric: false,
+                                        previousNext: false,
+                                        info: false,
+                                        @Html.Partial("_GridPagerMessages")
+                                    },
+                                    editable: {
+                                        confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                                        mode: "inline"
+                                    },
+                                    scrollable: false,
+                                    columns: [
+                                        {
+                                            field: "Name",
+                                            title: "@T("Admin.Configuration.Settings.Catalog.SortOptions.Name")",
+                                            width: 250
+                                        }, {
+                                            field: "DisplaySubscription",
+                                            title: "@T("Admin.Configuration.Settings.Catalog.SortOptions.DisplaySubscription")",
+                                            //integer format
+                                            format: "{0:0}",
+                                            width: 100
+                                        }, {
+                                            field: "IsActive",
+                                            title: "@T("Admin.Configuration.Settings.Catalog.SortOptions.IsActive")",
+                                            width: 100,
+                                            headerAttributes: { style: "text-align:center" },
+                                            attributes: { style: "text-align:center" },
+                                            template: '# if(IsActive) {# <i class="fa fa-check true-icon"></i> #} else {# <i class="fa fa-close false-icon"></i> #} #'
+                                        }, {
+                                            command: {
+                                                name: "edit",
+                                                text: {
+                                                    edit: "@T("Admin.Common.Edit")",
+                                                    update: "@T("Admin.Common.Update")",
+                                                    cancel: "@T("Admin.Common.Cancel")"
+                                                }
+                                            },
+                                            title: "@T("Admin.Common.Edit")",
+                                            width: 150
+                                        }
+                                    ]
+                                });
+                            });
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}

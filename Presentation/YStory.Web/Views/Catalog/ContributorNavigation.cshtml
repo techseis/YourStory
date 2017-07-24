@@ -1,0 +1,25 @@
+﻿@model ContributorNavigationModel
+@using YStory.Web.Models.Catalog;
+@if (Model.Contributors.Count > 0)
+{
+    <div class="block block-contributor-navigation">
+        <div class="title">
+            <strong>@T("Contributors")</strong>
+        </div>
+        <div class="listbox">
+            <ul class="list">
+                @foreach (var contributor in Model.Contributors)
+                {
+                    <li><a href="@Url.RouteUrl("Contributor", new { SeName = contributor.SeName })">@contributor.Name</a>
+                    </li>
+                }
+            </ul>            
+            @if (Model.TotalContributors > Model.Contributors.Count)
+            {
+                <div class="view-all">
+                    <a href="@Url.RouteUrl("ContributorList")">@T("Contributors.ViewAll")</a>
+                </div>
+            }
+        </div>
+    </div>
+}

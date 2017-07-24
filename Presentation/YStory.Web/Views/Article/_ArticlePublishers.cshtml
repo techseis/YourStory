@@ -1,0 +1,26 @@
+﻿@model IList<PublisherBriefInfoModel>
+@using YStory.Web.Models.Catalog;
+@if (Model.Count > 0)
+{
+    <div class="publishers">
+        @if (Model.Count == 1)
+        {
+            <span class="label">@T("Articles.Publisher"):</span>
+        }
+        else
+        {
+            <span class="label">@T("Articles.Publishers"):</span>
+        }
+        <span class="value">
+            @for (int i = 0; i < Model.Count; i++)
+            {
+                var item = Model[i];
+                <a href="@Url.RouteUrl("Publisher", new { SeName = item.SeName })">@item.Name</a>
+                if (i != Model.Count - 1)
+                {
+                <span class="separator">,</span>
+                }
+            }
+        </span>
+    </div>
+}

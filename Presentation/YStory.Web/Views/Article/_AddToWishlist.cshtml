@@ -1,0 +1,18 @@
+﻿@model ArticleDetailsModel.AddToCartModel
+@using YStory.Web.Models.Catalog;
+@using YStory.Core.Domain.Subscriptions;
+@if (!Model.DisableWishlistButton)
+{
+    var addToWishlistText = "";
+    if (Model.UpdatedShoppingCartItemId > 0 && Model.UpdateShoppingCartItemType.HasValue && Model.UpdateShoppingCartItemType.Value == ShoppingCartType.Wishlist)
+    {
+        addToWishlistText = T("Articles.Wishlist.AddToWishlist.Update").Text;
+    }
+    else
+    {
+        addToWishlistText = T("Articles.Wishlist.AddToWishlist").Text;
+    }
+    <div class="add-to-wishlist">
+        <input type="button" id="add-to-wishlist-button-@Model.ArticleId" class="button-2 add-to-wishlist-button" value="@addToWishlistText" data-articleid="@Model.ArticleId" onclick="AjaxCart.addarticletocart_details('@Url.RouteUrl("AddArticleToCart-Details", new {articleId = Model.ArticleId, shoppingCartTypeId = (int) ShoppingCartType.Wishlist})', '#article-details-form');return false;"/>
+    </div>
+}

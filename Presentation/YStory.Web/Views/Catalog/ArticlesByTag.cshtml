@@ -1,0 +1,56 @@
+﻿@model ArticlesByTagModel
+@{
+    Layout = "~/Views/Shared/_ColumnsTwo.cshtml";
+
+    //title
+    Html.AddTitleParts(string.Format(T("PageTitle.ArticlesByTag").Text, Model.TagName));
+    //page class
+    Html.AppendPageCssClassParts("html-article-tag-page");
+
+    //canonical URL
+    var canonicalUrlsEnabled = EngineContext.Current.Resolve<SeoSettings>().CanonicalUrlsEnabled;
+    if (canonicalUrlsEnabled)
+    {
+        var articlesByTagUrl = Url.RouteUrl("ArticlesByTag", new { articleTagId = Model.Id, SeName = Model.TagSeName }, this.Request.Url.Scheme);
+        Html.AddCanonicalUrlParts(articlesByTagUrl);
+    }
+}
+@using YStory.Core.Domain.Seo
+@using YStory.Core.Infrastructure
+@using YStory.Web.Models.Catalog;
+<div class="page article-tag-page">
+    <div class="page-title">
+        <h1>@String.Format(T("Articles.Tags.ArticlesTaggedWith").Text, Model.TagName)</h1>
+    </div>
+    <div class="page-body">
+        @Html.Widget("articlesbytag_top", Model.Id)
+        @if (Model.Articles.Count > 0)
+        {
+            @Html.Partial("_CatalogSelectors", Model.PagingFilteringContext, new ViewDataDictionary())
+        }
+        @Html.Widget("articlesbytag_before_article_list", Model.Id)
+        @if (Model.Articles.Count > 0)
+        {
+            <div class="@(Model.PagingFilteringContext.ViewMode == "list" ? "article-list" : "article-grid")">
+                <div class="item-grid">
+                    @foreach (var article in Model.Articles)
+                    {
+                        <div class="item-box">
+                            @Html.Partial("_ArticleBox", article)
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+        @{
+            var pager = Html.Pager(Model.PagingFilteringContext).QueryParam("pagenumber");
+        }
+        @if (!pager.IsEmpty())
+        {
+            <div class="pager">
+                @pager
+            </div>
+        }
+        @Html.Widget("articlesbytag_bottom", Model.Id)
+    </div>
+</div>

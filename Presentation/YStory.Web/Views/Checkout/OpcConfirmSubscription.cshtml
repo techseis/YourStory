@@ -1,0 +1,50 @@
+﻿@model CheckoutConfirmModel
+@using YStory.Web.Models.Checkout;
+<div class="checkout-data">
+    @Html.Widget("op_checkout_confirm_top")
+    @if (!string.IsNullOrEmpty(Model.MinSubscriptionTotalWarning) || Model.Warnings.Count > 0)
+    {
+        <div class="section confirm-subscription">
+            @if (!string.IsNullOrEmpty(Model.MinSubscriptionTotalWarning))
+            {
+                <div>
+                    <span class="min-subscription-warning">@Model.MinSubscriptionTotalWarning</span>
+                </div>
+            }
+            @if (Model.Warnings.Count > 0)
+            {
+                <div class="message-error">
+                    <ul>
+                        @foreach (var warning in Model.Warnings)
+                        {
+                            <li>@warning</li>
+                        }
+                    </ul>
+                </div>
+            }
+        </div>
+    }
+    @Html.Widget("op_checkout_confirm_bottom")
+    <div class="section subscription-summary">
+        @Html.Action("SubscriptionSummary", "ShoppingCart", new { prepareAndDisplaySubscriptionReviewData = true })
+    </div>
+    @if (String.IsNullOrEmpty(Model.MinSubscriptionTotalWarning) && Model.TermsOfServiceOnSubscriptionConfirmPage)
+    {
+        <div id="terms-of-service-warning-box" title="@T("Checkout.TermsOfService")" style="display:none;">
+            <p>@T("Checkout.TermsOfService.PleaseAccept")</p>
+        </div>
+        <div class="terms-of-service">
+            <input id="termsofservice" type="checkbox" name="termsofservice"/>
+            <label for="termsofservice">@T("Checkout.TermsOfService.IAccept")</label>
+            <a class="read" id="read-terms">@T("Checkout.TermsOfService.Read")</a>
+            <script>
+                $(document).ready(function() {
+                    $('#read-terms').on('click', function(e) {
+                        e.preventDefault();
+                        displayPopupContentFromUrl('@Url.RouteUrl("TopicPopup", new {SystemName = "conditionsofuse"})', '@T("Checkout.TermsOfService")');
+                    });
+                });
+            </script>
+        </div>
+    }
+</div>

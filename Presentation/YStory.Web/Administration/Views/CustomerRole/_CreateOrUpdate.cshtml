@@ -1,0 +1,129 @@
+﻿@model CustomerRoleModel
+
+@Html.ValidationSummary(true)
+@Html.HiddenFor(model => model.Id)
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        toggleRemoveButton();
+    });
+
+    function toggleRemoveButton() {
+        if ($('#@Html.FieldIdFor(model => model.PurchasedWithArticleId)').val() > 0) {
+            $('#purchased-with-article-name-remove').show();
+        } else {
+            $('#purchased-with-article-name-remove').hide();
+        }
+    }
+</script>
+
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.Name)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryEditorFor(model => model.Name, required: true)
+                            @Html.ValidationMessageFor(model => model.Name)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.SystemName)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryEditorFor(model => model.SystemName)
+                            @Html.ValidationMessageFor(model => model.SystemName)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.FreeShipping)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryEditorFor(model => model.FreeShipping)
+                            @Html.ValidationMessageFor(model => model.FreeShipping)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.TaxExempt)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryEditorFor(model => model.TaxExempt)
+                            @Html.ValidationMessageFor(model => model.TaxExempt)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.EnablePasswordLifetime)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryEditorFor(model => model.EnablePasswordLifetime)
+                            @Html.ValidationMessageFor(model => model.EnablePasswordLifetime)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.Active)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryEditorFor(model => model.Active)
+                            @Html.ValidationMessageFor(model => model.Active)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.IsSystemRole)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryDisplay(Model.IsSystemRole.ToString())
+                            @Html.HiddenFor(model => model.IsSystemRole)
+                            @Html.ValidationMessageFor(model => model.IsSystemRole)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.PurchasedWithArticleId)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.HiddenFor(model => model.PurchasedWithArticleId)
+                            <span id="purchased-with-article-name">@Model.PurchasedWithArticleName</span>
+                            @Html.ValidationMessageFor(model => model.PurchasedWithArticleId)
+                            <button type="submit" onclick="javascript:OpenWindow('@(Url.Action("AssociateArticleToCustomerRolePopup", "CustomerRole", new {articleIdInput = Html.FieldIdFor(model => model.PurchasedWithArticleId), articleNameInput = "purchased-with-article-name", btnId = "btnRefreshPurchasedWithArticle"}))', 800, 850, true); return false;" class="btn btn-primary">
+                                @T("Admin.Customers.CustomerRoles.Fields.PurchasedWithArticle.Choose")
+                            </button>
+                            <button type="submit" id="purchased-with-article-name-remove" class="btn bg-red">
+                                @T("Admin.Customers.CustomerRoles.Fields.PurchasedWithArticle.Remove")
+                            </button>
+                            <input type="submit" id="btnRefreshPurchasedWithArticle" style="display: none" />
+                            
+                            <script type="text/javascript">
+                                $(document).ready(function () {
+                                    $('#purchased-with-article-name-remove').click(function () {
+                                        $('#purchased-with-article-name').text('');
+                                        $("#@Html.FieldIdFor(model => model.PurchasedWithArticleId)").val(0);
+                                        toggleRemoveButton();
+                                        //return false to don't reload a page
+                                        return false;
+                                    });
+
+                                    $('#btnRefreshPurchasedWithArticle').click(function () {
+                                        toggleRemoveButton();
+
+                                        //return false to don't reload a page
+                                        return false;
+                                    });
+                                });
+                            </script>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

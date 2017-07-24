@@ -1,0 +1,254 @@
+﻿@model ArticleModel.ArticleAttributeValueModel
+
+@using YStory.Core.Domain.Catalog
+@using YStory.Services
+
+@{
+    Html.AddScriptParts("~/Administration/Scripts/farbtastic.js");
+    Html.AddCssFileParts("~/Administration/Content/farbtastic/farbtastic.css");
+}
+
+@Html.ValidationSummary(false)
+@Html.HiddenFor(model => model.Id)
+@Html.HiddenFor(model => model.ArticleAttributeMappingId)
+@Html.HiddenFor(model => model.DisplayColorSquaresRgb)
+@Html.HiddenFor(model => model.DisplayImageSquaresPicture)
+
+@if (ViewBag.RefreshPage == true)
+{
+    <script type="text/javascript">
+        try {window.opener.document.forms['@(ViewBag.formId)'].@(ViewBag.btnId).click();}
+        catch (e){}
+        window.close();
+    </script>
+}
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        $("#@Html.FieldIdFor(model => model.AttributeValueTypeId)").change(toggleArticleType);
+        $("#@Html.FieldIdFor(model => model.CustomerEntersQty)").change(toggleCustomerEntersQty);
+        toggleArticleType();
+    });
+
+    function toggleArticleType() {
+        var selectedArticleTypeId = $("#@Html.FieldIdFor(model => model.AttributeValueTypeId)").val();
+        if (selectedArticleTypeId == @(((int) AttributeValueType.Simple).ToString())) {
+            $('#group-associated-article').hide();
+        $('#group-customer-enters-qty').hide();
+        $('#group-quantity').hide();
+        $('#group-price-adjustment').show();
+        $('#group-weight-adjustment').show();
+        $('#group-cost').show();
+    } else if (selectedArticleTypeId == @(((int) AttributeValueType.AssociatedToArticle).ToString())) {
+        $('#group-associated-article').show();
+        $('#group-customer-enters-qty').show();
+        $('#group-price-adjustment').hide();
+        $('#group-weight-adjustment').hide();
+        $('#group-cost').hide();
+        toggleCustomerEntersQty();
+    }
+    };
+
+    function toggleCustomerEntersQty() {
+        if ($("#@Html.FieldIdFor(model => model.CustomerEntersQty)").is(':checked')) {
+            $('#group-quantity').hide();
+        }
+        else {
+            $('#group-quantity').show();
+        }
+    }
+</script>
+
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel-group">
+            <div class="panel panel-default panel-popup panel-popup">
+                <div class="panel-body">
+                    <div class="form-group">
+                        <div class="col-sm-3">
+                            @Html.YStoryLabelFor(model => model.AttributeValueTypeId)
+                        </div>
+                        <div class="col-sm-9">
+                            @Html.YStoryDropDownListFor(model => model.AttributeValueTypeId, ((AttributeValueType)Model.AttributeValueTypeId).ToSelectList())
+                            @Html.ValidationMessageFor(model => model.AttributeValueTypeId)
+                        </div>
+                    </div>
+                    <div class="form-group" id="group-associated-article">
+                        <div class="col-sm-3">
+                            @Html.YStoryLabelFor(model => model.AssociatedArticleId)
+                        </div>
+                        <div class="col-sm-9">
+                            @Html.HiddenFor(model => model.AssociatedArticleId)
+                            <span id="associate-article-name">@Model.AssociatedArticleName</span>
+                            @Html.ValidationMessageFor(model => model.AssociatedArticleId)
+                            <button type="submit" onclick="javascript:OpenWindow('@(Url.Action("AssociateArticleToAttributeValuePopup", "Article", new {articleIdInput = Html.FieldIdFor(model => model.AssociatedArticleId), articleNameInput = "associate-article-name"}))', 800, 850, true); return false;" class="btn btn-primary">
+                                @T("Admin.Catalog.Articles.ArticleAttributes.Attributes.Values.Fields.AssociatedArticle.AddNew")
+                            </button>
+                            <script type="text/javascript">
+                                $(document).ready(function () {
+                                    if (@Model.AssociatedArticleId > 0) {
+                                        warningValidation('@Url.Action("AssociatedArticleGetWarnings", "Article")', '@Html.FieldNameFor(model => model.AssociatedArticleId)', { articleId: '@Model.AssociatedArticleId' });
+                                    }
+                                    
+                                    $('#@Html.FieldIdFor(model => model.AssociatedArticleId)').on('change', function () {
+                                        warningValidation('@Url.Action("AssociatedArticleGetWarnings", "Article")', '@Html.FieldNameFor(model => model.AssociatedArticleId)', { articleId: $(this).val() });
+                                    });
+                                });
+                            </script>
+                        </div>
+                    </div>
+                    <div class="form-group" id="group-customer-enters-qty">
+                        <div class="col-sm-3">
+                            @Html.YStoryLabelFor(model => model.CustomerEntersQty)
+                        </div>
+                        <div class="col-sm-9">
+                            @Html.YStoryEditorFor(model => model.CustomerEntersQty)
+                            @Html.ValidationMessageFor(model => model.CustomerEntersQty)
+                        </div>
+                    </div>
+                    <div class="form-group" id="group-quantity">
+                        <div class="col-sm-3">
+                            @Html.YStoryLabelFor(model => model.Quantity)
+                        </div>
+                        <div class="col-sm-9">
+                            @Html.YStoryEditorFor(model => model.Quantity)
+                            @Html.ValidationMessageFor(model => model.Quantity)
+                        </div>
+                    </div>
+
+                    @(Html.LocalizedEditor<ArticleModel.ArticleAttributeValueModel, ArticleModel.ArticleAttributeValueLocalizedModel>("articleattributevalue-localized",
+                    @<div>
+                        <div class="form-group">
+                            <div class="col-sm-3">
+                                @Html.YStoryLabelFor(model => model.Locales[item].Name)
+                            </div>
+                            <div class="col-sm-9">
+                                @Html.YStoryEditorFor(model => model.Locales[item].Name)
+                                @Html.ValidationMessageFor(model => model.Locales[item].Name)
+                            </div>
+                        </div>
+                        @Html.HiddenFor(model => model.Locales[item].LanguageId)
+                    </div>
+    ,
+                    @<div>
+                        <div class="form-group">
+                            <div class="col-sm-3">
+                                @Html.YStoryLabelFor(model => model.Name)
+                            </div>
+                            <div class="col-sm-9">
+                                @Html.YStoryEditorFor(model => model.Name, required: true)
+                                @Html.ValidationMessageFor(model => model.Name)
+                            </div>
+                        </div>
+                    </div>
+    ))
+                    @if (Model.DisplayColorSquaresRgb)
+                    {
+                        <div class="form-group">
+                            <div class="col-sm-3">
+                                @Html.YStoryLabelFor(model => model.ColorSquaresRgb)
+                            </div>
+                            <div class="col-sm-9">
+                                @Html.YStoryEditorFor(model => model.ColorSquaresRgb)
+                                <div id="color-picker"></div>
+                                <script type="text/javascript">
+                                    $(document).ready(function(){
+                                        $('#color-picker').farbtastic('#@Html.FieldIdFor(model => model.ColorSquaresRgb)');
+                                    });
+                                </script>
+                                @Html.ValidationMessageFor(model => model.ColorSquaresRgb)
+                            </div>
+                        </div>
+                    }
+                    @if (Model.DisplayImageSquaresPicture)
+                    {
+                        <div class="form-group">
+                            <div class="col-sm-3">
+                                @Html.YStoryLabelFor(model => model.ImageSquaresPictureId)
+                            </div>
+                            <div class="col-sm-9">
+                                @Html.YStoryEditorFor(model => model.ImageSquaresPictureId)
+                                @Html.ValidationMessageFor(model => model.ImageSquaresPictureId)
+                            </div>
+                        </div>
+                    }
+                    <div class="form-group" id="group-price-adjustment">
+                        <div class="col-sm-3">
+                            @Html.YStoryLabelFor(model => model.PriceAdjustment)
+                        </div>
+                        <div class="col-sm-9">
+                            @Html.YStoryEditorFor(model => model.PriceAdjustment)
+                            @Html.ValidationMessageFor(model => model.PriceAdjustment)
+                        </div>
+                    </div>
+                    <div class="form-group" id="group-weight-adjustment">
+                        <div class="col-sm-3">
+                            @Html.YStoryLabelFor(model => model.WeightAdjustment)
+                        </div>
+                        <div class="col-sm-9">
+                            @Html.YStoryEditorFor(model => model.WeightAdjustment)
+                            @Html.ValidationMessageFor(model => model.WeightAdjustment)
+                        </div>
+                    </div>
+                    <div class="form-group" id="group-cost">
+                        <div class="col-sm-3">
+                            @Html.YStoryLabelFor(model => model.Cost)
+                        </div>
+                        <div class="col-sm-9">
+                            @Html.YStoryEditorFor(model => model.Cost)
+                            @Html.ValidationMessageFor(model => model.Cost)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-3">
+                            @Html.YStoryLabelFor(model => model.IsPreSelected)
+                        </div>
+                        <div class="col-sm-9">
+                            @Html.YStoryEditorFor(model => model.IsPreSelected)
+                            @Html.ValidationMessageFor(model => model.IsPreSelected)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-3">
+                            @Html.YStoryLabelFor(model => model.DisplaySubscription)
+                        </div>
+                        <div class="col-sm-9">
+                            @Html.YStoryEditorFor(model => model.DisplaySubscription)
+                            @Html.ValidationMessageFor(model => model.DisplaySubscription)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-3">
+                            @Html.YStoryLabelFor(model => model.PictureId)
+                        </div>
+                        <div class="col-sm-9">
+                            <div class="attribute-picture-selection-block clearfix">
+                                <div class="checkbox">
+                                    <label>
+                                        <input type="radio" name="@Html.FieldNameFor(x => x.PictureId)" value="0" id="id_image_0"
+                                               @if (Model.PictureId == 0)
+                                               {
+                                                   <text> checked="checked" </text>
+                                               }>
+                                        @T("Admin.Catalog.Articles.ArticleAttributes.Attributes.Values.Fields.Picture.NoPicture")
+                                    </label>
+                                </div>
+                                @foreach (var picture in Model.ArticlePictureModels)
+                                {
+                                    <div class="checkbox">
+                                        <label>
+                                            <input type="radio" name="@Html.FieldNameFor(x => x.PictureId)" value="@picture.PictureId" id="id_image_@picture.PictureId"
+                                                   @if (picture.PictureId == Model.PictureId) { <text> checked="checked" </text>  }>
+                                            <img src="@picture.PictureUrl" alt="" title="" width="75">
+                                        </label>
+                                    </div>
+                                }
+                            </div>
+                            @Html.ValidationMessageFor(model => model.PictureId)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

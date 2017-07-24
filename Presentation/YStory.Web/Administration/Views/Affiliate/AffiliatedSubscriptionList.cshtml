@@ -1,0 +1,176 @@
+﻿@model AffiliatedSubscriptionListModel
+@{
+    var defaultGridPageSize = EngineContext.Current.Resolve<YStory.Core.Domain.Common.AdminAreaSettings>().DefaultGridPageSize;
+    var gridPageSizes = EngineContext.Current.Resolve<YStory.Core.Domain.Common.AdminAreaSettings>().GridPageSizes;
+}
+
+<div class="panel-group">
+    <div class="panel panel-default panel-search">
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <div class="col-md-4">
+                            @Html.YStoryLabelFor(model => model.StartDate)
+                        </div>
+                        <div class="col-md-8">
+                            @Html.YStoryEditorFor(model => model.StartDate)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-4">
+                            @Html.YStoryLabelFor(model => model.EndDate)
+                        </div>
+                        <div class="col-md-8">
+                            @Html.YStoryEditorFor(model => model.EndDate)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-4">
+                            @Html.YStoryLabelFor(model => model.SubscriptionStatusId)
+                        </div>
+                        <div class="col-md-8">
+                            @Html.YStoryDropDownList("SubscriptionStatusId", Model.AvailableSubscriptionStatuses)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-4">
+                            @Html.YStoryLabelFor(model => model.PaymentStatusId)
+                        </div>
+                        <div class="col-md-8">
+                            @Html.YStoryDropDownList("PaymentStatusId", Model.AvailablePaymentStatuses)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-4">
+                            @Html.YStoryLabelFor(model => model.ShippingStatusId)
+                        </div>
+                        <div class="col-md-8">
+                            @Html.YStoryDropDownList("ShippingStatusId", Model.AvailableShippingStatuses)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-8 col-md-offset-4">
+                            <button type="button" id="search-subscriptions" class="btn btn-primary btn-search">
+                                <i class="fa fa-search"></i>
+                                @T("Admin.Common.Search")
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div id="subscriptions-grid"></div>
+
+            <script>
+                $(document).ready(function () {
+                    $("#subscriptions-grid").kendoGrid({
+                        dataSource: {
+                            type: "json",
+                            transport: {
+                                read: {
+                                    url: "@Html.Raw(Url.Action("AffiliatedSubscriptionListGrid", "Affiliate"))",
+                                    type: "POST",
+                                    dataType: "json",
+                                    data: additionalData
+                                }
+                            },
+                            schema: {
+                                data: "Data",
+                                total: "Total",
+                                errors: "Errors"
+                            },
+                            error: function(e) {
+                                display_kendoui_grid_error(e);
+                                // Cancel the changes
+                                this.cancelChanges();
+                            },
+                            pageSize: @(defaultGridPageSize),
+                            serverPaging: true,
+                            serverFiltering: true,
+                            serverSorting: true
+                        },
+                        pageable: {
+                            refresh: true,
+                            pageSizes: [@(gridPageSizes)],
+                            @Html.Partial("_GridPagerMessages")
+                        },
+                        editable: {
+                            confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                            mode: "inline"
+                        },
+                        scrollable: false,
+                        columns: [{
+                            field: "CustomSubscriptionNumber",
+                            title: "@T("Admin.Affiliates.Subscriptions.CustomSubscriptionNumber")",
+                            width: 200
+                        }, {
+                            field: "SubscriptionStatus",
+                            title: "@T("Admin.Affiliates.Subscriptions.SubscriptionStatus")",
+                            template: '<span class="grid-report-item ' +
+                                                    '# if(SubscriptionStatusId == 10) {# yellow #} #' +
+                                                    '# if(SubscriptionStatusId == 20) {# blue #} #' +
+                                                    '# if(SubscriptionStatusId == 30) {# green #} #' +
+                                                    '# if(SubscriptionStatusId == 40) {# red #} #' +
+                                                    '">#=SubscriptionStatus#</span>'
+                        }, {
+                            field: "PaymentStatus",
+                            title: "@T("Admin.Affiliates.Subscriptions.PaymentStatus")"
+                        },{
+                            field: "ShippingStatus",
+                            title: "@T("Admin.Affiliates.Subscriptions.ShippingStatus")"
+                        },{
+                            field: "SubscriptionTotal",
+                            title: "@T("Admin.Affiliates.Subscriptions.SubscriptionTotal")"
+                        },{
+                            field: "CreatedOn",
+                            title: "@T("Admin.Affiliates.Subscriptions.CreatedOn")",
+                            type: "date",
+                            format: "{0:G}"
+                        },{
+                            field: "Id",
+                            title: "@T("Admin.Common.View")",
+                            width: 100,
+                            headerAttributes: { style: "text-align:center" },
+                            attributes: { style: "text-align:center" },
+                            template: '<a class="btn btn-default" href="@Url.Content("~/Admin/Subscription/Edit/")#=Id#"><i class="fa fa-eye"></i>@T("Admin.Common.View")</a>'
+                        }]
+                    });
+                });
+            </script>
+
+            <script type="text/javascript">
+                var selectedIds = [];
+                var reportAggregates = "";
+
+                $(document).ready(function () {
+                    //search button
+                    $('#search-subscriptions').click(function () {
+                        //search
+                        var grid = $('#subscriptions-grid').data('kendoGrid');
+                        grid.dataSource.page(1); //new search. Set page size to 1
+                        //grid.dataSource.read(); we already loaded the grid above using "page" function
+                        return false;
+                    });
+                });
+
+                function additionalData() {
+                    var data = {
+                        AffliateId: @(Model.AffliateId),
+                        StartDate: $('#@Html.FieldIdFor(model => model.StartDate)').val(),
+                        EndDate: $('#@Html.FieldIdFor(model => model.EndDate)').val(),
+                        SubscriptionStatusId: $('#@Html.FieldIdFor(model => model.SubscriptionStatusId)').val(),
+                        PaymentStatusId: $('#@Html.FieldIdFor(model => model.PaymentStatusId)').val(),
+                        ShippingStatusId: $('#@Html.FieldIdFor(model => model.ShippingStatusId)').val()
+                    };
+                    addAntiForgeryToken(data);
+                    return data;
+                }
+            </script>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,824 @@
+﻿@model SubscriptionModel
+
+@using YStory.Core.Domain.Tax;
+@using YStory.Core.Domain.Subscriptions;
+@using YStory.Services
+@if (!Model.IsLoggedInAsContributor)
+{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            toggleChangeSubscriptionStatus(false);
+            toggleSubscriptionTotals(false);
+            toggleCC(false);
+        });
+
+        function toggleChangeSubscriptionStatus(editmode) {
+            if (editmode) {
+                $('#pnlChangeSubscriptionStatus').show();
+                $('#btnChangeSubscriptionStatus').hide();
+            } else {
+                $('#pnlChangeSubscriptionStatus').hide();
+                $('#btnChangeSubscriptionStatus').show();
+            }
+        }
+
+        function toggleSubscriptionTotals(editmode) {
+            if (editmode) {
+                $('#trEditSubscriptionTotals').show();
+                $('#btnEditSubscriptionTotals').hide();
+                $('#btnSaveSubscriptionTotals').show();
+                $('#btnCancelSubscriptionTotals').show();
+            } else {
+                $('#trEditSubscriptionTotals').hide();
+                $('#btnEditSubscriptionTotals').show();
+                $('#btnSaveSubscriptionTotals').hide();
+                $('#btnCancelSubscriptionTotals').hide();
+            }
+        }
+
+        function toggleCC(editmode) {
+            if (editmode) {
+                $('#lblCardType').hide();
+                $('#@Html.FieldIdFor(model => model.CardType)').show();
+                $('#lblCardName').hide();
+                $('#@Html.FieldIdFor(model => model.CardName)').show();
+                $('#lblCardNumber').hide();
+                $('#@Html.FieldIdFor(model => model.CardNumber)').show();
+                $('#lblCardCvv2').hide();
+                $('#@Html.FieldIdFor(model => model.CardCvv2)').show();
+                $('#lblCardExpirationMonth').hide();
+                $('#@Html.FieldIdFor(model => model.CardExpirationMonth)').show();
+                $('#lblCardExpirationYear').hide();
+                $('#@Html.FieldIdFor(model => model.CardExpirationYear)').show();
+                $('#btnEditCC').hide();
+                $('#btnSaveCC').show();
+                $('#btnCancelCC').show();
+            } else {
+                $('#lblCardType').show();
+                $('#@Html.FieldIdFor(model => model.CardType)').hide();
+                $('#lblCardName').show();
+                $('#@Html.FieldIdFor(model => model.CardName)').hide();
+                $('#lblCardNumber').show();
+                $('#@Html.FieldIdFor(model => model.CardNumber)').hide();
+                $('#lblCardCvv2').show();
+                $('#@Html.FieldIdFor(model => model.CardCvv2)').hide();
+                $('#lblCardExpirationMonth').show();
+                $('#@Html.FieldIdFor(model => model.CardExpirationMonth)').hide();
+                $('#lblCardExpirationYear').show();
+                $('#@Html.FieldIdFor(model => model.CardExpirationYear)').hide();
+                $('#btnEditCC').show();
+                $('#btnSaveCC').hide();
+                $('#btnCancelCC').hide();
+            }
+        }
+    </script>
+}
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-body">
+            @if (!Model.IsLoggedInAsContributor)
+            {
+                <div class="form-group">
+                    <div class="col-md-3">
+                        @Html.YStoryLabelFor(model => model.SubscriptionStatus)
+                    </div>
+                    <div class="col-md-9">
+                        <div class="input-group input-group-short">
+                            <div class="input-group-text">
+                                <strong>
+                                    @Html.YStoryDisplayFor(model => model.SubscriptionStatus)
+                                </strong>
+                            </div>
+                            <div class="input-group-btn">
+                                @if (Model.CanCancelSubscription)
+                                {
+                                    <button type="submit" name="cancelsubscription" id="cancelsubscription" class="btn bg-red" style="margin-right: 3px;">
+                                        @T("Admin.Subscriptions.Fields.SubscriptionStatus.Cancel")
+                                    </button>
+                                    @Html.ActionConfirmation("cancelsubscription")
+                                }
+                                <button type="submit" name="btnChangeSubscriptionStatus" onclick="toggleChangeSubscriptionStatus(true);return false;" id="btnChangeSubscriptionStatus" class="btn btn-primary">
+                                    @T("Admin.Subscriptions.Fields.SubscriptionStatus.Change")
+                                </button>
+                                <div id="pnlChangeSubscriptionStatus" style="margin-top: 3px;">
+                                    @Html.YStoryDropDownListFor(model => model.SubscriptionStatusId, ((SubscriptionStatus) Model.SubscriptionStatusId).ToSelectList())
+                                    <button type="submit" name="btnSaveSubscriptionStatus" id="btnSaveSubscriptionStatus" class="btn btn-primary" style="margin-left: 3px">
+                                        @T("Admin.Common.Save")
+                                    </button>
+                                    @Html.ActionConfirmation("btnSaveSubscriptionStatus")
+                                    <button type="submit" name="btnCancelSubscriptionStatus" onclick="toggleChangeSubscriptionStatus(false);return false;" id="btnCancelSubscriptionStatus" class="btn bg-teal" style="margin-left: 3px">
+                                        @T("Admin.Common.Cancel")
+                                    </button>
+                                    <div class="input-group-btn-hint">
+                                        <em>@T("Admin.Subscriptions.Fields.SubscriptionStatus.Change.ForAdvancedUsers")</em>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                //contributors should see whether or subscription is cancelled
+                if (Model.SubscriptionStatusId == (int)SubscriptionStatus.Cancelled)
+                {
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            &nbsp;
+                        </div>
+                        <div class="col-md-9">
+                            <strong>
+                                @T("Admin.Subscriptions.Fields.SubscriptionStatus.CancelledNotification")
+                            </strong>
+                        </div>
+                    </div>
+                }
+            }
+            <div class="form-group">
+                <div class="col-md-3">
+                    @Html.YStoryLabelFor(model => model.CustomSubscriptionNumber)
+                </div>
+                <div class="col-md-9">
+                    @Html.YStoryDisplayFor(model => model.CustomSubscriptionNumber)
+                </div>
+            </div>           
+            @if (!Model.IsLoggedInAsContributor)
+            {
+                <div class="form-group">
+                    <div class="col-md-3">
+                        @Html.YStoryLabelFor(model => model.SubscriptionGuid)
+                    </div>
+                    <div class="col-md-9">
+                        @Html.YStoryDisplayFor(model => model.SubscriptionGuid)
+                    </div>
+                </div>
+            }
+            <div class="form-group">
+                <div class="col-md-3">
+                    @Html.YStoryLabelFor(model => model.StoreName)
+                </div>
+                <div class="col-md-9">
+                    @Html.YStoryDisplayFor(model => model.StoreName)
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (!Model.IsLoggedInAsContributor)
+    {
+    <div class="panel panel-default">
+        <div class="panel-body">
+                <div class="form-group">
+                    <div class="col-md-3">
+                        @Html.YStoryLabelFor(model => model.CustomerId)
+                    </div>
+                    <div class="col-md-9">
+                        @Html.ActionLink(Model.CustomerInfo, "Edit", "Customer", new { id = Model.CustomerId }, new { })
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        @Html.YStoryLabelFor(model => model.CustomerIp)
+                    </div>
+                    <div class="col-md-9">
+                        @Html.YStoryDisplayFor(model => model.CustomerIp)
+                    </div>
+                </div>
+                @if (Model.RecurringPaymentId > 0)
+                {
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.RecurringPaymentId)
+                        </div>
+                        <div class="col-md-9">
+                            <a href="@Url.Action("Edit", "RecurringPayment", new {id = Model.RecurringPaymentId})">@T("Admin.Common.View")</a>
+                        </div>
+                    </div>
+                }
+                @if (!String.IsNullOrEmpty(Model.VatNumber))
+                {
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.VatNumber)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryDisplayFor(model => model.VatNumber)
+                        </div>
+                    </div>
+                }
+                @if (Model.AffiliateId > 0)
+                {
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.AffiliateId)
+                        </div>
+                        <div class="col-md-9">
+                            <a href="@Url.Action("Edit", "Affiliate", new {id = Model.AffiliateId})">@Model.AffiliateName - @T("Admin.Common.View")</a>
+                        </div>
+                    </div>
+                }
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <div class="label-wrapper">
+                            <label class="control-label">@T("Admin.Subscriptions.Fields.SubscriptionSubtotal")</label>
+                            <div class="ico-help" title="@T("Admin.Subscriptions.Fields.SubscriptionSubtotal.Hint")">
+                                <i class="fa fa-question-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-7">
+                        <div class="row">
+                            @if (Model.AllowCustomersToSelectTaxDisplayType || Model.TaxDisplayType == TaxDisplayType.IncludingTax)
+                            {
+                                <div class="col-md-2">
+                                    <div class="form-text-row">
+                                        @Html.DisplayFor(model => model.SubscriptionSubtotalInclTax) <strong>@T("Admin.Subscriptions.Fields.SubscriptionSubtotalInclTax")</strong>
+                                    </div>
+                                </div>
+                            }
+                            @if (Model.AllowCustomersToSelectTaxDisplayType || Model.TaxDisplayType == TaxDisplayType.ExcludingTax)
+                            {
+                                <div class="col-md-10">
+                                    <div class="form-text-row">
+                                        @Html.DisplayFor(model => model.SubscriptionSubtotalExclTax) <strong>@T("Admin.Subscriptions.Fields.SubscriptionSubtotalExclTax")</strong>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+                @if (((Model.AllowCustomersToSelectTaxDisplayType || Model.TaxDisplayType == TaxDisplayType.IncludingTax) && !String.IsNullOrEmpty(Model.SubscriptionSubTotalDiscountInclTax)) ||
+                    ((Model.AllowCustomersToSelectTaxDisplayType || Model.TaxDisplayType == TaxDisplayType.ExcludingTax) && !String.IsNullOrEmpty(Model.SubscriptionSubTotalDiscountExclTax)))
+                {
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">@T("Admin.Subscriptions.Fields.SubscriptionSubTotalDiscount")</label>
+                                <div class="ico-help" title="@T("Admin.Subscriptions.Fields.SubscriptionSubTotalDiscount.Hint")">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-7">
+                            <div class="row">
+                                @if ((Model.AllowCustomersToSelectTaxDisplayType || Model.TaxDisplayType == TaxDisplayType.IncludingTax) && !String.IsNullOrEmpty(Model.SubscriptionSubTotalDiscountInclTax))
+                                {
+                                    <div class="col-md-2">
+                                        <div class="form-text-row">
+                                            @Html.DisplayFor(model => model.SubscriptionSubTotalDiscountInclTax) <strong>@T("Admin.Subscriptions.Fields.SubscriptionSubTotalDiscountInclTax")</strong>
+                                        </div>
+                                    </div>
+                                }
+                                @if ((Model.AllowCustomersToSelectTaxDisplayType || Model.TaxDisplayType == TaxDisplayType.ExcludingTax) && !String.IsNullOrEmpty(Model.SubscriptionSubTotalDiscountExclTax))
+                                {
+                                    <div class="col-md-10">
+                                        <div class="form-text-row">
+                                            @Html.DisplayFor(model => model.SubscriptionSubTotalDiscountExclTax) <strong>@T("Admin.Subscriptions.Fields.SubscriptionSubTotalDiscountExclTax")</strong>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <div class="label-wrapper">
+                            <label class="control-label">@T("Admin.Subscriptions.Fields.SubscriptionShipping")</label>
+                            <div class="ico-help" title="@T("Admin.Subscriptions.Fields.SubscriptionShipping.Hint")">
+                                <i class="fa fa-question-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-7">
+                        <div class="row">
+                            @if (Model.AllowCustomersToSelectTaxDisplayType || Model.TaxDisplayType == TaxDisplayType.IncludingTax)
+                            {
+                                <div class="col-md-2">
+                                    <div class="form-text-row">
+                                        @Html.DisplayFor(model => model.SubscriptionShippingInclTax) <strong>@T("Admin.Subscriptions.Fields.SubscriptionShippingInclTax")</strong>
+                                    </div>
+                                </div>
+                            }
+                            @if (Model.AllowCustomersToSelectTaxDisplayType || Model.TaxDisplayType == TaxDisplayType.ExcludingTax)
+                            {
+                                <div class="col-md-2">
+                                    <div class="form-text-row">
+                                        @Html.DisplayFor(model => model.SubscriptionShippingExclTax) <strong>@T("Admin.Subscriptions.Fields.SubscriptionShippingExclTax")</strong>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+                @if (((Model.AllowCustomersToSelectTaxDisplayType || Model.TaxDisplayType == TaxDisplayType.IncludingTax) && !String.IsNullOrEmpty(Model.PaymentMethodAdditionalFeeInclTax)) ||
+                    ((Model.AllowCustomersToSelectTaxDisplayType || Model.TaxDisplayType == TaxDisplayType.ExcludingTax) && !String.IsNullOrEmpty(Model.PaymentMethodAdditionalFeeExclTax)))
+                {
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="control-label">@T("Admin.Subscriptions.Fields.PaymentMethodAdditionalFee")</label>
+                                <div class="ico-help" title="@T("Admin.Subscriptions.Fields.PaymentMethodAdditionalFee.Hint")">
+                                    <i class="fa fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-7">
+                            <div class="row">
+                                @if (Model.AllowCustomersToSelectTaxDisplayType || Model.TaxDisplayType == TaxDisplayType.IncludingTax)
+                                {
+                                    <div class="col-md-2">
+                                        <div class="form-text-row">
+                                            @Html.DisplayFor(model => model.PaymentMethodAdditionalFeeInclTax) <strong>@T("Admin.Subscriptions.Fields.PaymentMethodAdditionalFeeInclTax")</strong>
+                                        </div>
+                                    </div>
+                                }
+                                @if (Model.AllowCustomersToSelectTaxDisplayType || Model.TaxDisplayType == TaxDisplayType.ExcludingTax)
+                                {
+                                    <div class="col-md-2">
+                                        <div class="form-text-row">
+                                            @Html.DisplayFor(model => model.PaymentMethodAdditionalFeeExclTax) <strong>@T("Admin.Subscriptions.Fields.PaymentMethodAdditionalFeeExclTax")</strong>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+                @if (Model.DisplayTaxRates)
+                {
+                    foreach (var tr in Model.TaxRates)
+                    {
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.YStoryLabelFor(model => model.Tax) <span style="padding-top: 7px;margin-right: 5px;float: right;">@tr.Rate%</span>
+                            </div>
+                            <div class="col-md-9">
+                                @tr.Value
+                            </div>
+                        </div>
+                    }
+                }
+                @if (Model.DisplayTax)
+                {
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.Tax)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryDisplayFor(model => model.Tax)
+                        </div>
+                    </div>
+                }
+                @if (!String.IsNullOrEmpty(Model.SubscriptionTotalDiscount))
+                {
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.SubscriptionTotalDiscount)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryDisplayFor(model => model.SubscriptionTotalDiscount)
+                        </div>
+                    </div>
+                }
+                @foreach (var gc in Model.GiftCards)
+                {
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.GiftCards[0].CouponCode)
+                            <span style="padding-top: 7px;margin-right: 5px;float: right;">(@(gc.CouponCode))</span>
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryDisplay(gc.Amount)
+                        </div>
+                    </div>
+                }
+                @if (Model.RedeemedRewardPoints > 0)
+                {
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.RedeemedRewardPoints)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryDisplay(Model.RedeemedRewardPoints + @T("Admin.Subscriptions.Fields.RedeemedRewardPoints.Points").Text + "/" + Model.RedeemedRewardPointsAmount)
+                        </div>
+                    </div>
+                }
+                <div class="form-group">
+                    <div class="col-md-3">
+                        @Html.YStoryLabelFor(model => model.SubscriptionTotal)
+                    </div>
+                    <div class="col-md-9">
+                        @Html.YStoryDisplayFor(model => model.SubscriptionTotal)
+                    </div>
+                </div>
+                @if (!String.IsNullOrEmpty(Model.RefundedAmount))
+                {
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.RefundedAmount)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryDisplayFor(model => model.RefundedAmount)
+                        </div>
+                    </div>
+                }
+                @if (Model.UsedDiscounts.Count > 0)
+                {
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.UsedDiscounts)
+                        </div>
+                        <div class="col-md-9">
+                            @for (int i = 0; i < Model.UsedDiscounts.Count; i++)
+                            {
+                                var discount = Model.UsedDiscounts[i];
+                                <a href="@Url.Action("Edit", "Discount", new {id = discount.DiscountId})">@discount.DiscountName</a>
+                                if (i != Model.UsedDiscounts.Count - 1)
+                                {
+                                    <text>,</text>
+                                }
+                            }
+                        </div>
+                    </div>
+                }
+                <div class="form-group">
+                    <div class="col-md-3">
+                        @Html.YStoryLabelFor(model => model.Profit)
+                    </div>
+                    <div class="col-md-9">
+                        @Html.YStoryDisplayFor(model => model.Profit)
+                    </div>
+                </div>
+                <div id="trEditSubscriptionTotals">
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.SubscriptionSubtotalInclTaxValue)
+                        </div>
+                        <div class="col-md-9">
+                            <div class="pull-left margin-r-10">
+                                @T("Admin.Subscriptions.Fields.Edit.InclTax")
+                                @Html.YStoryEditorFor(model => model.SubscriptionSubtotalInclTaxValue)
+                            </div>
+                            <div class="pull-left">
+                                @T("Admin.Subscriptions.Fields.Edit.ExclTax")
+                                @Html.YStoryEditorFor(model => model.SubscriptionSubtotalExclTaxValue)
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.SubscriptionSubTotalDiscountInclTaxValue)
+                        </div>
+                        <div class="col-md-9">
+                            <div class="pull-left margin-r-10">
+                                @T("Admin.Subscriptions.Fields.Edit.InclTax")
+                                @Html.YStoryEditorFor(model => model.SubscriptionSubTotalDiscountInclTaxValue)
+                            </div>
+                            <div class="pull-left">
+                                @T("Admin.Subscriptions.Fields.Edit.ExclTax")
+                                @Html.YStoryEditorFor(model => model.SubscriptionSubTotalDiscountExclTaxValue)
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.SubscriptionShippingInclTaxValue)
+                        </div>
+                        <div class="col-md-9">
+                            <div class="pull-left margin-r-10">
+                                @T("Admin.Subscriptions.Fields.Edit.InclTax")
+                                @Html.YStoryEditorFor(model => model.SubscriptionShippingInclTaxValue)
+                            </div>
+                            <div class="pull-left">
+                                @T("Admin.Subscriptions.Fields.Edit.ExclTax")
+                                @Html.YStoryEditorFor(model => model.SubscriptionShippingExclTaxValue)
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.PaymentMethodAdditionalFeeInclTaxValue)
+                        </div>
+                        <div class="col-md-9">
+                            <div class="pull-left margin-r-10">
+                                @T("Admin.Subscriptions.Fields.Edit.InclTax")
+                                @Html.YStoryEditorFor(model => model.PaymentMethodAdditionalFeeInclTaxValue)
+                            </div>
+                            <div class="pull-left">
+                                @T("Admin.Subscriptions.Fields.Edit.ExclTax")
+                                @Html.YStoryEditorFor(model => model.PaymentMethodAdditionalFeeExclTaxValue)
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.TaxRatesValue)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryEditorFor(model => model.TaxRatesValue)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.TaxValue)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryEditorFor(model => model.TaxValue)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.SubscriptionTotalDiscountValue)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryEditorFor(model => model.SubscriptionTotalDiscountValue)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.SubscriptionTotalValue)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryEditorFor(model => model.SubscriptionTotalValue)
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-9 col-md-offset-3">
+                        <button type="submit" name="btnEditSubscriptionTotals" onclick="toggleSubscriptionTotals(true);return false;" id="btnEditSubscriptionTotals" class="btn btn-primary">
+                            @T("Admin.Subscriptions.Fields.EditSubscriptionTotals")
+                        </button>
+
+                        <button type="submit" name="btnSaveSubscriptionTotals" id="btnSaveSubscriptionTotals" class="btn btn-primary">
+                            @T("Admin.Subscriptions.Fields.SaveSubscriptionTotals")
+                        </button>
+                        @Html.ActionConfirmation("btnSaveSubscriptionTotals")
+
+                        <button type="submit" name="btnCancelSubscriptionTotals" onclick="toggleSubscriptionTotals(false);return false;" id="btnCancelSubscriptionTotals" class="btn bg-teal">
+                            @T("Admin.Common.Cancel")
+                        </button>
+                    </div>
+                </div>
+                @if (Model.AllowStoringCreditCardNumber)
+                {
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.CardType)
+                        </div>
+                        <div class="col-md-9">
+                            <div id="lblCardType">
+                                @Html.YStoryDisplayFor(model => model.CardType)
+                            </div>
+                            @Html.YStoryEditorFor(model => model.CardType)
+                        </div>
+                    </div>
+                }
+                @if (Model.AllowStoringCreditCardNumber)
+                {
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.CardName)
+                        </div>
+                        <div class="col-md-9">
+                            <div id="lblCardName">
+                                @Html.YStoryDisplayFor(model => model.CardName)
+                            </div>
+                            @Html.YStoryEditorFor(model => model.CardName)
+                        </div>
+                    </div>
+                }
+                @if (Model.AllowStoringCreditCardNumber || !String.IsNullOrEmpty(Model.CardNumber))
+                {
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.CardNumber)
+                        </div>
+                        <div class="col-md-9">
+                            <div id="lblCardNumber">
+                                @Html.YStoryDisplayFor(model => model.CardNumber)
+                            </div>
+                            @Html.YStoryEditorFor(model => model.CardNumber)
+                        </div>
+                    </div>
+                }
+                @if (Model.AllowStoringCreditCardNumber)
+                {
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.CardCvv2)
+                        </div>
+                        <div class="col-md-9">
+                            <div id="lblCardCvv2">
+                                @Html.YStoryDisplayFor(model => model.CardCvv2)
+                            </div>
+                            @Html.YStoryEditorFor(model => model.CardCvv2)
+                        </div>
+                    </div>
+                }
+                @if (Model.AllowStoringCreditCardNumber)
+                {
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.CardExpirationMonth)
+                        </div>
+                        <div class="col-md-9">
+                            <div id="lblCardExpirationMonth">
+                                @Html.YStoryDisplayFor(model => model.CardExpirationMonth)
+                            </div>
+                            @Html.YStoryEditorFor(model => model.CardExpirationMonth)
+                        </div>
+                    </div>
+                }
+                @if (Model.AllowStoringCreditCardNumber)
+                {
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.CardExpirationYear)
+                        </div>
+                        <div class="col-md-9">
+                            <div id="lblCardExpirationYear">
+                                @Html.YStoryDisplayFor(model => model.CardExpirationYear)
+                            </div>
+                            @Html.YStoryEditorFor(model => model.CardExpirationYear)
+                        </div>
+                    </div>
+                }
+                @if (Model.AllowStoringCreditCardNumber)
+                {
+                    <div class="form-group">
+                        <div class="col-md-9 col-md-offset-3">
+                            <button type="submit" name="btnEditCC" onclick="toggleCC(true);return false;" id="btnEditCC" class="btn btn-primary">
+                                @T("Admin.Subscriptions.Fields.EditCC")
+                            </button>
+
+                            <button type="submit" name="btnSaveCC" id="btnSaveCC" class="btn btn-primary">
+                                @T("Admin.Subscriptions.Fields.SaveCC")
+                            </button>
+                            @Html.ActionConfirmation("btnSaveCC")
+
+                            <button type="submit" name="btnCancelCC" onclick="toggleCC(false);return false;" id="btnCancelCC" class="btn bg-teal">
+                                @T("Admin.Common.Cancel")
+                            </button>
+                        </div>
+                    </div>
+                }
+                @if (!String.IsNullOrEmpty(Model.AuthorizationTransactionId))
+                {
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.AuthorizationTransactionId)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryDisplayFor(model => model.AuthorizationTransactionId)
+                        </div>
+                    </div>
+                }
+                @if (!String.IsNullOrEmpty(Model.CaptureTransactionId))
+                {
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.CaptureTransactionId)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryDisplayFor(model => model.CaptureTransactionId)
+                        </div>
+                    </div>
+                }
+                @if (!String.IsNullOrEmpty(Model.SubscriptionTransactionId))
+                {
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.SubscriptionTransactionId)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryDisplayFor(model => model.SubscriptionTransactionId)
+                        </div>
+                    </div>
+                }
+                <div class="form-group">
+                    <div class="col-md-3">
+                        @Html.YStoryLabelFor(model => model.PaymentMethod)
+                    </div>
+                    <div class="col-md-9">
+                        @Html.YStoryDisplayFor(model => model.PaymentMethod)
+                    </div>
+                </div>
+        </div>
+    </div>
+    }
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="form-group">
+                <div class="col-md-3">
+                    @Html.YStoryLabelFor(model => model.PaymentStatus)
+                </div>
+                <div class="col-md-9">
+                    @Html.YStoryDisplayFor(model => model.PaymentStatus)
+                </div>
+            </div>
+            @if (Model.CanCapture || Model.CanMarkSubscriptionAsPaid || Model.CanRefund || Model.CanRefundOffline ||
+                Model.CanPartiallyRefund || Model.CanPartiallyRefundOffline || Model.CanVoid || Model.CanVoidOffline)
+            {
+                <div class="form-group">
+                    <div class="col-md-9 col-md-offset-3">
+                        @if (!Model.IsLoggedInAsContributor)
+                        {
+                            if (Model.CanCapture)
+                            {
+                                <button type="submit" name="capturesubscription" id="capturesubscription" class="btn btn-primary">
+                                    @T("Admin.Subscriptions.Fields.Capture")
+                                </button>
+                                <text>&nbsp;</text>
+                                @Html.ActionConfirmation("capturesubscription")
+                            }
+                            if (Model.CanMarkSubscriptionAsPaid)
+                            {
+                                <button type="submit" name="marksubscriptionaspaid" id="marksubscriptionaspaid" class="btn btn-primary">
+                                    @T("Admin.Subscriptions.Fields.MarkAsPaid")
+                                </button>
+                                <text>&nbsp;</text>
+                                @Html.ActionConfirmation("marksubscriptionaspaid")
+                            }
+                            if (Model.CanRefund)
+                            {
+                                <button type="submit" name="refundsubscription" id="refundsubscription" class="btn btn-primary">
+                                    @T("Admin.Subscriptions.Fields.Refund")
+                                </button>
+                                <text>&nbsp;</text>
+                                @Html.ActionConfirmation("refundsubscription")
+                            }
+                            if (Model.CanRefundOffline)
+                            {
+                                <button type="submit" name="refundsubscriptionoffline" id="refundsubscriptionoffline" class="btn btn-primary">
+                                    @T("Admin.Subscriptions.Fields.RefundOffline")
+                                </button>
+                                <text>&nbsp;</text>
+                                @Html.ActionConfirmation("refundsubscriptionoffline")
+                            }
+                            if (Model.CanPartiallyRefund)
+                            {
+                                <button type="submit" id="partiallyrefundsubscription" name="partiallyrefundsubscription" onclick="javascript:OpenWindow('@(Url.Action("PartiallyRefundSubscriptionPopup", "Subscription", new {id = Model.Id, online = true, btnId = "btnRefreshPage", formId = "subscription-form"}))', 500, 300, true); return false;" class="btn btn-primary">
+                                    @T("Admin.Subscriptions.Fields.PartialRefund")
+                                </button>
+                                <text>&nbsp;</text>
+                            }
+                            if (Model.CanPartiallyRefundOffline)
+                            {
+                                <button type="submit" id="partiallyrefundsubscriptionoffline" name="partiallyrefundsubscriptionoffline" onclick="javascript:OpenWindow('@(Url.Action("PartiallyRefundSubscriptionPopup", "Subscription", new {id = Model.Id, online = false, btnId = "btnRefreshPage", formId = "subscription-form"}))', 500, 300, true); return false;" class="btn btn-primary">
+                                    @T("Admin.Subscriptions.Fields.PartialRefundOffline")
+                                </button>
+                                <text>&nbsp;</text>
+                            }
+                            if (Model.CanVoid)
+                            {
+                                <button type="submit" name="voidsubscription" id="voidsubscription" class="btn btn-primary">
+                                    @T("Admin.Subscriptions.Fields.Void")
+                                </button>
+                                <text>&nbsp;</text>
+                                @Html.ActionConfirmation("voidsubscription")
+                            }
+                            if (Model.CanVoidOffline)
+                            {
+                                <button type="submit" name="voidsubscriptionoffline" id="voidsubscriptionoffline" class="btn btn-primary">
+                                    @T("Admin.Subscriptions.Fields.VoidOffline")
+                                </button>
+                                <text>&nbsp;</text>
+                                @Html.ActionConfirmation("voidsubscriptionoffline")
+                            }
+                        }
+                    </div>
+                </div>
+            }
+            @if (Model.CustomValues != null && Model.CustomValues.Count > 0)
+            {
+                <div class="form-group">
+                    <div class="col-md-3">
+                        @Html.YStoryLabelFor(model => model.CustomValues)
+                    </div>
+                    <div class="col-md-9">
+                        <div class="form-text-row">
+                            @foreach (var item in Model.CustomValues)
+                            {
+                                <ul class="common-list">
+                                    <li>
+                                        @item.Key: @(item.Value != null ? item.Value.ToString() : "")
+                                    </li>
+                                </ul>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+            <div class="form-group">
+                <div class="col-md-3">
+                    @Html.YStoryLabelFor(model => model.CreatedOn)
+                </div>
+                <div class="col-md-9">
+                    @Html.YStoryDisplayFor(model => model.CreatedOn)
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

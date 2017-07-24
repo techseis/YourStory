@@ -1,0 +1,176 @@
+﻿@model NeverSoldReportModel
+
+@{
+    var defaultGridPageSize = EngineContext.Current.Resolve<YStory.Core.Domain.Common.AdminAreaSettings>().DefaultGridPageSize;
+    var gridPageSizes = EngineContext.Current.Resolve<YStory.Core.Domain.Common.AdminAreaSettings>().GridPageSizes;
+
+    //page title
+    ViewBag.Title = T("Admin.SalesReport.NeverSold").Text;
+    //active menu item (system name)
+    Html.SetActiveMenuItemSystemName("Articles never purchased");
+}
+
+@Html.AntiForgeryToken()
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        @T("Admin.SalesReport.NeverSold")
+    </h1>
+    <div class="pull-right">
+        &nbsp;
+    </div>
+</div>
+
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-5">
+                            <div class="form-group" @(Model.AvailableCategories.SelectionIsNotPossible() ? Html.Raw("style=\"display:none\"") : null)>
+                                <div class="col-md-3">
+                                    @Html.YStoryLabelFor(model => model.SearchCategoryId)
+                                </div>
+                                <div class="col-md-9">
+                                    @Html.YStoryDropDownList("SearchCategoryId", Model.AvailableCategories)
+                                </div>
+                            </div>
+                            <div class="form-group" @(Model.AvailablePublishers.SelectionIsNotPossible() ? Html.Raw("style=\"display:none\"") : null)>
+                                <div class="col-md-3">
+                                    @Html.YStoryLabelFor(model => model.SearchPublisherId)
+                                </div>
+                                <div class="col-md-9">
+                                    @Html.YStoryDropDownList("SearchPublisherId", Model.AvailablePublishers)
+                                </div>
+                            </div>
+                            <div class="form-group" @(Model.AvailableStores.SelectionIsNotPossible() ? Html.Raw("style=\"display:none\"") : null)>
+                                <div class="col-md-3">
+                                    @Html.YStoryLabelFor(model => model.SearchStoreId)
+                                </div>
+                                <div class="col-md-9">
+                                    @Html.YStoryDropDownList("SearchStoreId", Model.AvailableStores)
+                                </div>
+                            </div>
+                            <div class="form-group" @(Model.AvailableContributors.SelectionIsNotPossible() || Model.IsLoggedInAsContributor ? Html.Raw("style='display: none;'") : null)>
+                                <div class="col-md-3">
+                                    @Html.YStoryLabelFor(model => model.SearchContributorId)
+                                </div>
+                                <div class="col-md-9">
+                                    @Html.YStoryDropDownList("SearchContributorId", Model.AvailableContributors)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-7">
+                            <div class="form-group">
+                                <div class="col-md-3">
+                                    @Html.YStoryLabelFor(model => model.StartDate)
+                                </div>
+                                <div class="col-md-9">
+                                    @Html.YStoryEditorFor(model => model.StartDate)
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3">
+                                    @Html.YStoryLabelFor(model => model.EndDate)
+                                </div>
+                                <div class="col-md-9">
+                                    @Html.YStoryEditorFor(model => model.EndDate)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-7 col-md-offset-5">
+                                <button type="button" id="search-neversoldreport" class="btn btn-primary btn-search">
+                                    <i class="fa fa-line-chart"></i>
+                                    @T("Admin.SalesReport.NeverSold.RunReport")
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div id="neversoldreport-grid"></div>
+
+                    <script>
+                        $(document).ready(function () {
+                            $("#neversoldreport-grid").kendoGrid({
+                                dataSource: {
+                                    type: "json",
+                                    transport: {
+                                        read: {
+                                            url: "@Html.Raw(Url.Action("NeverSoldReportList", "Subscription"))",
+                                            type: "POST",
+                                            dataType: "json",
+                                            data: additionalData
+                                        }
+                                    },
+                                    schema: {
+                                        data: "Data",
+                                        total: "Total",
+                                        errors: "Errors"
+                                    },
+                                    error: function(e) {
+                                        display_kendoui_grid_error(e);
+                                        // Cancel the changes
+                                        this.cancelChanges();
+                                    },
+                                    pageSize: @(defaultGridPageSize),
+                                    serverPaging: true,
+                                    serverFiltering: true,
+                                    serverSorting: true
+                                },
+                                pageable: {
+                                    refresh: true,
+                                    pageSizes: [@(gridPageSizes)],
+                                    @Html.Partial("_GridPagerMessages")
+                                },
+                                editable: {
+                                    confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                                    mode: "inline"
+                                },
+                                scrollable: false,
+                                columns: [{
+                                    field: "ArticleName",
+                                    title: "@T("Admin.SalesReport.NeverSold.Fields.Name")"
+                                }, {
+                                    field: "ArticleId",
+                                    title: "@T("Admin.Common.View")",
+                                    width: 100,
+                                    headerAttributes: { style: "text-align:center" },
+                                    attributes: { style: "text-align:center" },
+                                    template: '<a class="btn btn-default" href="@Url.Content("~/Admin/Article/Edit/")#=ArticleId#"><i class="fa fa-eye"></i>@T("Admin.Common.View")</a>'
+                                }]
+                            });
+                        });
+                    </script>
+
+                    <script type="text/javascript">
+                        $(document).ready(function () {
+                            $('#search-neversoldreport').click(function () {
+                                var grid = $('#neversoldreport-grid').data('kendoGrid');
+                                grid.dataSource.page(1); //new search. Set page size to 1
+                                //grid.dataSource.read(); we already loaded the grid above using "page" function
+                                return false;
+                            });
+                        });
+
+                        function additionalData() {
+                            var data = {
+                                StartDate: $('#@Html.FieldIdFor(model => model.StartDate)').val(),
+                                EndDate: $('#@Html.FieldIdFor(model => model.EndDate)').val(),
+                                SearchCategoryId: $('#SearchCategoryId').val(),
+                                SearchPublisherId: $('#SearchPublisherId').val(),
+                                SearchStoreId: $('#SearchStoreId').val(),
+                                SearchContributorId: $('#SearchContributorId').val()
+                            };
+                            addAntiForgeryToken(data);
+                            return data;
+                        }
+                    </script>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

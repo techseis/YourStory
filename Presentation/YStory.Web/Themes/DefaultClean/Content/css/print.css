@@ -1,0 +1,107 @@
+
+body {
+	font: normal 9pt Arial, Helvetica, sans-serif;
+	color: #000;
+}
+table {
+	width: 100%;
+	border: 0;
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+li {
+	list-style: none;
+}
+a {
+	color: inherit;
+}
+
+.subscription-details-page .subscription-overview {
+	margin: 0 0 25px;
+}
+.subscription-details-page .subscription-overview .subscription-number {
+	font-size: 11pt;
+	text-transform: uppercase;
+    padding: 10px 40px;
+}
+.subscription-details-page .subscription-overview .subscription-total {
+	margin: 10px 0 0;
+}
+.subscription-details-page .subscription-overview .subscription-total strong {
+	font-size: 10pt;
+}
+
+.subscription-details-page .subscription-details-area {
+	margin: 0 0 25px;
+	overflow: hidden;
+}
+.subscription-details-page .subscription-details-area ul {
+    padding-left: 0px;
+}
+.subscription-details-page .subscription-details-area > div {
+	float: left;
+	width: 48%;
+	margin: 0 1% 40px;
+}
+.subscription-details-page .subscription-details-area li.title {
+	margin: 10px 0 5px;
+	font-weight: bold;
+}
+.subscription-details-page .subscription-details-area li:first-child {
+	margin-top: 0;
+}
+
+.subscription-details-page .data-table {
+	border: 1px solid;
+}
+.subscription-details-page .data-table th {
+	border-right: 1px solid;
+	border-bottom: 1px solid;
+	padding: 5px 10px;
+	font-weight: bold;
+	white-space: nowrap;
+}
+.subscription-details-page .data-table td {
+	border-right: 1px solid;
+	border-bottom: 1px solid;
+	padding: 5px 10px;
+}
+.subscription-details-page .data-table .sku,
+.subscription-details-page .data-table .unit-price,
+.subscription-details-page .data-table .quantity,
+.subscription-details-page .data-table .total {
+    white-space: nowrap;
+    text-align: center;
+}
+.subscription-details-page .data-table .unit-price,
+.subscription-details-page .data-table .quantity,
+.subscription-details-page .data-table .total {
+	width: 15%;
+}
+.subscription-details-page .data-table label {
+	display: none;
+}
+
+.subscription-details-page .section {
+	margin: 30px 0;
+}
+.subscription-details-page .section .title {
+	margin: 0 0 10px;
+}
+.subscription-details-page .tax-shipping-info,
+.subscription-details-page .selected-checkout-attributes {
+	margin: 20px 0;
+	text-align:right;
+}
+
+.subscription-details-page .cart-total-right {
+    white-space: nowrap;
+}
+.subscription-details-page .cart-total td {
+	padding: 5px 10px;
+	text-align: right;
+}
+.subscription-details-page td.cart-total-left {
+	width: 100%;
+	font-weight: bold;
+}

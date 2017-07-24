@@ -1,0 +1,109 @@
+﻿@model DashboardModel
+
+@using YStory.Services.Security
+
+@{
+    Html.AppendCssFileParts("~/Administration/Content/ionicons/css/ionicons-2.0.1.min.css");
+
+    //page title
+    ViewBag.Title = T("Admin.Dashboard").Text;
+
+    var permissionService = EngineContext.Current.Resolve<IPermissionService>();
+    var canManageSubscriptions = permissionService.Authorize(StandardPermissionProvider.ManageSubscriptions);
+    var canManageCustomers = permissionService.Authorize(StandardPermissionProvider.ManageCustomers);
+    var canManageArticles = permissionService.Authorize(StandardPermissionProvider.ManageArticles);
+    var canManageReturnRequests = permissionService.Authorize(StandardPermissionProvider.ManageReturnRequests);
+}
+
+@Html.AntiForgeryToken()
+<div class="content-header">
+    <h1>
+        @T("Admin.Dashboard")
+    </h1>
+</div>
+
+<div class="content">
+    <div class="row">
+        <div class="col-md-12">
+            @Html.Widget("admin_dashboard_top")
+            @if (!Model.IsLoggedInAsContributor)
+            {
+                <div class="row">
+                    <div class="col-md-12">
+                        @Html.Action("YourStoryNews", "Home")
+                    </div>
+                </div>
+            }
+            @Html.Widget("admin_dashboard_news_after")
+            @if (!Model.IsLoggedInAsContributor && canManageSubscriptions && canManageCustomers && canManageArticles && canManageReturnRequests)
+            {
+                <div class="row">
+                    <div class="col-md-12">
+                        @Html.Action("CommonStatistics", "Home")
+                    </div>
+                </div>
+            }
+            @Html.Widget("admin_dashboard_commonstatistics_after")
+            @if (!Model.IsLoggedInAsContributor && (canManageSubscriptions || canManageCustomers))
+            {
+                <div class="row">
+                    @if (!Model.IsLoggedInAsContributor && canManageSubscriptions)
+                    {
+                        <div class="col-md-6">
+                            @Html.Action("SubscriptionStatistics", "Subscription")
+                        </div>
+                    }
+                    @if (!Model.IsLoggedInAsContributor && canManageCustomers)
+                    {
+                        <div class="col-md-6">
+                            @Html.Action("CustomerStatistics", "Customer")
+                        </div>
+                    }
+                </div>
+            }
+            @Html.Widget("admin_dashboard_customersubscriptioncharts_after")
+            @if (!Model.IsLoggedInAsContributor && canManageSubscriptions)
+            {
+                <div class="row">
+                    <div class="col-md-8">
+                        @Html.Action("SubscriptionAverageReport", "Subscription")
+                    </div>
+                    <div class="col-md-4">
+                        @Html.Action("SubscriptionIncompleteReport", "Subscription")
+                    </div>
+                </div>
+            }
+            @Html.Widget("admin_dashboard_subscriptionreports_after")
+            @if (!Model.IsLoggedInAsContributor && (canManageSubscriptions || canManageArticles))
+            {
+                <div class="row">
+                    @if (canManageSubscriptions)
+                    {
+                        <div class="col-md-8">
+                            @Html.Action("LatestSubscriptions", "Subscription")
+                        </div>
+                    }
+                    <div class="col-md-4">
+                        @if (canManageArticles)
+                        {
+                            @Html.Action("PopularSearchTermsReport", "Common")
+                        }
+                    </div>
+                </div>
+            }
+            @Html.Widget("admin_dashboard_latestsubscriptions_searchterms_after")
+            @if (canManageSubscriptions)
+            {
+                <div class="row">
+                    <div class="col-md-6">
+                        @Html.Action("BestsellersBriefReportByQuantity", "Subscription")
+                    </div>
+                    <div class="col-md-6">
+                        @Html.Action("BestsellersBriefReportByAmount", "Subscription")
+                    </div>
+                </div>
+            }
+            @Html.Widget("admin_dashboard_bottom")
+        </div>
+    </div>
+</div>

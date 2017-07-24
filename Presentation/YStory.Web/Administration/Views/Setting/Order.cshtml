@@ -1,0 +1,433 @@
+﻿@model SubscriptionSettingsModel
+
+@{
+    //page title
+    ViewBag.Title = T("Admin.Configuration.Settings.Subscription").Text;
+    //active menu item (system name)
+    Html.SetActiveMenuItemSystemName("Subscription settings");
+}
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            @T("Admin.Configuration.Settings.Subscription")
+        </h1>
+        <div class="pull-right">
+            <button type="submit" name="save" class="btn bg-blue">
+                <i class="fa fa-floppy-o"></i>
+                @T("Admin.Common.Save")
+            </button>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            bindBootstrapTabSelectEvent('subscriptionsettings-edit');
+        });
+    </script>
+
+    <div class="content">
+        <div class="form-horizontal">
+            @Html.Action("StoreScopeConfiguration", "Setting")
+            @Html.Action("Mode", "Setting")
+            @Html.ValidationSummary(false)
+
+            <div id="subscriptionsettings-edit" class="nav-tabs-custom">
+                <ul class="nav nav-tabs">
+                    @Html.RenderBootstrapTabHeader("tab-info", @T("Admin.Configuration.Settings.Subscription.SubscriptionSettings"), true)
+                    @Html.RenderBootstrapTabHeader("tab-returnrequest", @T("Admin.Configuration.Settings.Subscription.ReturnRequestSettings"))
+                </ul>
+                <div class="tab-content">
+                    @Html.RenderBootstrapTabContent("tab-info", @TaborderSettings(), true)
+                    @Html.RenderBootstrapTabContent("tab-returnrequest", @TabReturnRequestSettings())
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {
+        //custom tabs
+        var eventMessage = new AdminTabStripCreated(this.Html, "subscriptionsettings-edit");
+        EngineContext.Current.Resolve<IEventPublisher>().Publish(eventMessage);
+        foreach (var eventBlock in eventMessage.BlocksToRender)
+        {
+            @eventBlock
+        }
+    }
+
+    @*save selected tab name*@
+    <input type="hidden" id="selected-tab-name" name="selected-tab-name" value="@(Html.GetSelectedTabName())">
+}
+
+@helper TaborderSettings()
+{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#@Html.FieldIdFor(model => model.OnePageCheckoutEnabled)").click(toggleOnePageCheckoutEnabled);
+            toggleOnePageCheckoutEnabled();
+        });
+
+        function toggleOnePageCheckoutEnabled() {
+            if ($('#@Html.FieldIdFor(model => model.OnePageCheckoutEnabled)').is(':checked')) {
+                $('#pnlOnePageCheckoutDisplaySubscriptionTotalsOnPaymentInfoTab').show();
+            }
+            else {
+                $('#pnlOnePageCheckoutDisplaySubscriptionTotalsOnPaymentInfoTab').hide();
+            }
+        }
+    </script>
+
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                @T("Admin.Configuration.Settings.Subscription.BlockTitle.Checkout")
+            </div>
+            <div class="panel-body">
+                <div class="form-group">
+                    <div class="col-md-3">
+                        @Html.OverrideStoreCheckboxFor(model => model.AnonymousCheckoutAllowed_OverrideForStore, model => model.AnonymousCheckoutAllowed, Model.ActiveStoreScopeConfiguration)
+                        @Html.YStoryLabelFor(model => model.AnonymousCheckoutAllowed)
+                    </div>
+                    <div class="col-md-9">
+                        @Html.YStoryEditorFor(model => model.AnonymousCheckoutAllowed)
+                        @Html.ValidationMessageFor(model => model.AnonymousCheckoutAllowed)
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        @Html.OverrideStoreCheckboxFor(model => model.OnePageCheckoutEnabled_OverrideForStore, model => model.OnePageCheckoutEnabled, Model.ActiveStoreScopeConfiguration)
+                        @Html.YStoryLabelFor(model => model.OnePageCheckoutEnabled)
+                    </div>
+                    <div class="col-md-9">
+                        @Html.YStoryEditorFor(model => model.OnePageCheckoutEnabled)
+                        @Html.ValidationMessageFor(model => model.OnePageCheckoutEnabled)
+                    </div>
+                </div>
+                <div class="form-group advanced-setting" id="pnlOnePageCheckoutDisplaySubscriptionTotalsOnPaymentInfoTab">
+                    <div class="col-md-3">
+                        @Html.OverrideStoreCheckboxFor(model => model.OnePageCheckoutDisplaySubscriptionTotalsOnPaymentInfoTab_OverrideForStore, model => model.OnePageCheckoutDisplaySubscriptionTotalsOnPaymentInfoTab, Model.ActiveStoreScopeConfiguration)
+                        @Html.YStoryLabelFor(model => model.OnePageCheckoutDisplaySubscriptionTotalsOnPaymentInfoTab)
+                    </div>
+                    <div class="col-md-9">
+                        @Html.YStoryEditorFor(model => model.OnePageCheckoutDisplaySubscriptionTotalsOnPaymentInfoTab)
+                        @Html.ValidationMessageFor(model => model.OnePageCheckoutDisplaySubscriptionTotalsOnPaymentInfoTab)
+                    </div>
+                </div>
+                <div class="form-group advanced-setting">
+                    <div class="col-md-3">
+                        @Html.OverrideStoreCheckboxFor(model => model.TermsOfServiceOnShoppingCartPage_OverrideForStore, model => model.TermsOfServiceOnShoppingCartPage, Model.ActiveStoreScopeConfiguration)
+                        @Html.YStoryLabelFor(model => model.TermsOfServiceOnShoppingCartPage)
+                    </div>
+                    <div class="col-md-9">
+                        @Html.YStoryEditorFor(model => model.TermsOfServiceOnShoppingCartPage)
+                        @Html.ValidationMessageFor(model => model.TermsOfServiceOnShoppingCartPage)
+                    </div>
+                </div>
+                <div class="form-group advanced-setting">
+                    <div class="col-md-3">
+                        @Html.OverrideStoreCheckboxFor(model => model.TermsOfServiceOnSubscriptionConfirmPage_OverrideForStore, model => model.TermsOfServiceOnSubscriptionConfirmPage, Model.ActiveStoreScopeConfiguration)
+                        @Html.YStoryLabelFor(model => model.TermsOfServiceOnSubscriptionConfirmPage)
+                    </div>
+                    <div class="col-md-9">
+                        @Html.YStoryEditorFor(model => model.TermsOfServiceOnSubscriptionConfirmPage)
+                        @Html.ValidationMessageFor(model => model.TermsOfServiceOnSubscriptionConfirmPage)
+                    </div>
+                </div>
+                <div class="form-group advanced-setting">
+                    <div class="col-md-3">
+                        @Html.OverrideStoreCheckboxFor(model => model.DisableBillingAddressCheckoutStep_OverrideForStore, model => model.DisableBillingAddressCheckoutStep, Model.ActiveStoreScopeConfiguration)
+                        @Html.YStoryLabelFor(model => model.DisableBillingAddressCheckoutStep)
+                    </div>
+                    <div class="col-md-9">
+                        @Html.YStoryEditorFor(model => model.DisableBillingAddressCheckoutStep)
+                        @Html.ValidationMessageFor(model => model.DisableBillingAddressCheckoutStep)
+                    </div>
+                </div>
+                <div class="form-group advanced-setting">
+                    <div class="col-md-3">
+                        @Html.OverrideStoreCheckboxFor(model => model.DisableSubscriptionCompletedPage_OverrideForStore, model => model.DisableSubscriptionCompletedPage, Model.ActiveStoreScopeConfiguration)
+                        @Html.YStoryLabelFor(model => model.DisableSubscriptionCompletedPage)
+                    </div>
+                    <div class="col-md-9">
+                        @Html.YStoryEditorFor(model => model.DisableSubscriptionCompletedPage)
+                        @Html.ValidationMessageFor(model => model.DisableSubscriptionCompletedPage)
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="panel panel-default advanced-setting">
+            <div class="panel-heading">
+                @T("Admin.Configuration.Settings.Subscription.BlockTitle.SubscriptionTotals")
+            </div>
+            <div class="panel-body">
+                <div class="form-group">
+                    <div class="col-md-3">
+                        @Html.OverrideStoreCheckboxFor(model => model.MinSubscriptionSubtotalAmount_OverrideForStore, model => model.MinSubscriptionSubtotalAmount, Model.ActiveStoreScopeConfiguration)
+                        @Html.YStoryLabelFor(model => model.MinSubscriptionSubtotalAmount)
+                    </div>
+                    <div class="col-md-9">
+                        @Html.YStoryEditorFor(model => model.MinSubscriptionSubtotalAmount, Model.PrimaryStoreCurrencyCode)
+                        @Html.ValidationMessageFor(model => model.MinSubscriptionSubtotalAmount)
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        @Html.OverrideStoreCheckboxFor(model => model.MinSubscriptionSubtotalAmountIncludingTax_OverrideForStore, model => model.MinSubscriptionSubtotalAmountIncludingTax, Model.ActiveStoreScopeConfiguration)
+                        @Html.YStoryLabelFor(model => model.MinSubscriptionSubtotalAmountIncludingTax)
+                    </div>
+                    <div class="col-md-9">
+                        @Html.YStoryEditorFor(model => model.MinSubscriptionSubtotalAmountIncludingTax)
+                        @Html.ValidationMessageFor(model => model.MinSubscriptionSubtotalAmountIncludingTax)
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        @Html.OverrideStoreCheckboxFor(model => model.MinSubscriptionTotalAmount_OverrideForStore, model => model.MinSubscriptionTotalAmount, Model.ActiveStoreScopeConfiguration)
+                        @Html.YStoryLabelFor(model => model.MinSubscriptionTotalAmount)
+                    </div>
+                    <div class="col-md-9">
+                        @Html.YStoryEditorFor(model => model.MinSubscriptionTotalAmount, Model.PrimaryStoreCurrencyCode)
+                        @Html.ValidationMessageFor(model => model.MinSubscriptionTotalAmount)
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        @Html.OverrideStoreCheckboxFor(model => model.AutoUpdateSubscriptionTotalsOnEditingSubscription_OverrideForStore, model => model.AutoUpdateSubscriptionTotalsOnEditingSubscription, Model.ActiveStoreScopeConfiguration)
+                        @Html.YStoryLabelFor(model => model.AutoUpdateSubscriptionTotalsOnEditingSubscription)
+                    </div>
+                    <div class="col-md-9">
+                        @Html.YStoryEditorFor(model => model.AutoUpdateSubscriptionTotalsOnEditingSubscription)
+                        @Html.ValidationMessageFor(model => model.AutoUpdateSubscriptionTotalsOnEditingSubscription)
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="panel panel-default advanced-setting">
+            <div class="panel-heading">
+                @T("Admin.Configuration.Settings.Subscription.BlockTitle.Common")
+            </div>
+            <div class="panel-body">
+                @if (Model.SubscriptionIdent.HasValue)
+                {
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.SubscriptionIdent)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryEditorFor(model => model.SubscriptionIdent)
+                        </div>
+                    </div>
+                }
+                <div class="form-group">
+                    <div class="col-md-3">
+                        @Html.OverrideStoreCheckboxFor(model => model.CustomSubscriptionNumberMask_OverrideForStore, model => model.CustomSubscriptionNumberMask, Model.ActiveStoreScopeConfiguration)
+                        @Html.YStoryLabelFor(model => model.CustomSubscriptionNumberMask)
+                    </div>
+                    <div class="col-md-9">
+                        @Html.YStoryEditorFor(model => model.CustomSubscriptionNumberMask)
+                        @Html.ValidationMessageFor(model => model.CustomSubscriptionNumberMask)
+                        <ul class="common-list">
+                            <li>
+                                @T("Admin.Configuration.Settings.Subscription.CustomSubscriptionNumberMask.Description.YYYY")
+                            </li>
+                            <li>
+                                @T("Admin.Configuration.Settings.Subscription.CustomSubscriptionNumberMask.Description.YY")
+                            </li>
+                            <li>
+                                @T("Admin.Configuration.Settings.Subscription.CustomSubscriptionNumberMask.Description.MM")
+                            </li>
+                            <li>
+                                @T("Admin.Configuration.Settings.Subscription.CustomSubscriptionNumberMask.Description.DD")
+                            </li>
+                            <li>
+                                @T("Admin.Configuration.Settings.Subscription.CustomSubscriptionNumberMask.Description.ID")
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        @Html.OverrideStoreCheckboxFor(model => model.IsReSubscriptionAllowed_OverrideForStore, model => model.IsReSubscriptionAllowed, Model.ActiveStoreScopeConfiguration)
+                        @Html.YStoryLabelFor(model => model.IsReSubscriptionAllowed)
+                    </div>
+                    <div class="col-md-9">
+                        @Html.YStoryEditorFor(model => model.IsReSubscriptionAllowed)
+                        @Html.ValidationMessageFor(model => model.IsReSubscriptionAllowed)
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        @Html.YStoryLabelFor(model => model.CompleteSubscriptionWhenDelivered)
+                    </div>
+                    <div class="col-md-9">
+                        @Html.YStoryEditorFor(model => model.CompleteSubscriptionWhenDelivered)
+                        @Html.ValidationMessageFor(model => model.CompleteSubscriptionWhenDelivered)
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        @Html.OverrideStoreCheckboxFor(model => model.ExportWithArticles_OverrideForStore, model => model.ExportWithArticles, Model.ActiveStoreScopeConfiguration)
+                        @Html.YStoryLabelFor(model => model.ExportWithArticles)
+                    </div>
+                    <div class="col-md-9">
+                        @Html.YStoryEditorFor(model => model.ExportWithArticles)
+                        @Html.ValidationMessageFor(model => model.ExportWithArticles)
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="panel panel-default advanced-setting">
+            <div class="panel-heading">
+                @T("Admin.Configuration.Settings.Subscription.BlockTitle.PdfInvoice")
+            </div>
+            <div class="panel-body">
+                <div class="form-group">
+                    <div class="col-md-3">
+                        @Html.OverrideStoreCheckboxFor(model => model.AttachPdfInvoiceToSubscriptionPlacedEmail_OverrideForStore, model => model.AttachPdfInvoiceToSubscriptionPlacedEmail, Model.ActiveStoreScopeConfiguration)
+                        @Html.YStoryLabelFor(model => model.AttachPdfInvoiceToSubscriptionPlacedEmail)
+                    </div>
+                    <div class="col-md-9">
+                        @Html.YStoryEditorFor(model => model.AttachPdfInvoiceToSubscriptionPlacedEmail)
+                        @Html.ValidationMessageFor(model => model.AttachPdfInvoiceToSubscriptionPlacedEmail)
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        @Html.OverrideStoreCheckboxFor(model => model.AttachPdfInvoiceToSubscriptionPaidEmail_OverrideForStore, model => model.AttachPdfInvoiceToSubscriptionPaidEmail, Model.ActiveStoreScopeConfiguration)
+                        @Html.YStoryLabelFor(model => model.AttachPdfInvoiceToSubscriptionPaidEmail)
+                    </div>
+                    <div class="col-md-9">
+                        @Html.YStoryEditorFor(model => model.AttachPdfInvoiceToSubscriptionPaidEmail)
+                        @Html.ValidationMessageFor(model => model.AttachPdfInvoiceToSubscriptionPaidEmail)
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        @Html.OverrideStoreCheckboxFor(model => model.AttachPdfInvoiceToSubscriptionCompletedEmail_OverrideForStore, model => model.AttachPdfInvoiceToSubscriptionCompletedEmail, Model.ActiveStoreScopeConfiguration)
+                        @Html.YStoryLabelFor(model => model.AttachPdfInvoiceToSubscriptionCompletedEmail)
+                    </div>
+                    <div class="col-md-9">
+                        @Html.YStoryEditorFor(model => model.AttachPdfInvoiceToSubscriptionCompletedEmail)
+                        @Html.ValidationMessageFor(model => model.AttachPdfInvoiceToSubscriptionCompletedEmail)
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="panel panel-default advanced-setting">
+            <div class="panel-heading">
+                @T("Admin.Configuration.Settings.Subscription.BlockTitle.GiftCards")
+            </div>
+            <div class="panel-body">
+                <div class="form-group">
+                    <div class="col-md-3">
+                        @Html.YStoryLabelFor(model => model.ActivateGiftCardsAfterCompletingSubscription)
+                    </div>
+                    <div class="col-md-9">
+                        @Html.YStoryEditorFor(model => model.ActivateGiftCardsAfterCompletingSubscription)
+                        @Html.ValidationMessageFor(model => model.ActivateGiftCardsAfterCompletingSubscription)
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        @Html.YStoryLabelFor(model => model.DeactivateGiftCardsAfterCancellingSubscription)
+                    </div>
+                    <div class="col-md-9">
+                        @Html.YStoryEditorFor(model => model.DeactivateGiftCardsAfterCancellingSubscription)
+                        @Html.ValidationMessageFor(model => model.DeactivateGiftCardsAfterCancellingSubscription)
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        @Html.YStoryLabelFor(model => model.DeactivateGiftCardsAfterDeletingSubscription)
+                    </div>
+                    <div class="col-md-9">
+                        @Html.YStoryEditorFor(model => model.DeactivateGiftCardsAfterDeletingSubscription)
+                        @Html.ValidationMessageFor(model => model.DeactivateGiftCardsAfterDeletingSubscription)
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@helper TabReturnRequestSettings()
+{
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                @T("Admin.Configuration.Settings.Subscription.BlockTitle.Common")
+            </div>
+            <div class="panel-body">
+                <ul class="common-list">
+                    <li>
+                        @T("Admin.Configuration.Settings.Subscription.ReturnRequestsDescription1")
+                    </li>
+                    <li>
+                        @T("Admin.Configuration.Settings.Subscription.ReturnRequestsDescription2")
+                    </li>
+                </ul>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        @Html.OverrideStoreCheckboxFor(model => model.ReturnRequestsEnabled_OverrideForStore, model => model.ReturnRequestsEnabled, Model.ActiveStoreScopeConfiguration)
+                        @Html.YStoryLabelFor(model => model.ReturnRequestsEnabled)
+                    </div>
+                    <div class="col-md-9">
+                        @Html.YStoryEditorFor(model => model.ReturnRequestsEnabled)
+                        @Html.ValidationMessageFor(model => model.ReturnRequestsEnabled)
+                    </div>
+                </div>
+                <div class="form-group advanced-setting">
+                    <div class="col-md-3">
+                        @Html.OverrideStoreCheckboxFor(model => model.ReturnRequestNumberMask_OverrideForStore, model => model.ReturnRequestNumberMask, Model.ActiveStoreScopeConfiguration)
+                        @Html.YStoryLabelFor(model => model.ReturnRequestNumberMask)
+                    </div>
+                    <div class="col-md-9">
+                        @Html.YStoryEditorFor(model => model.ReturnRequestNumberMask)
+                        @Html.ValidationMessageFor(model => model.ReturnRequestNumberMask)
+                        <ul class="common-list">
+                            <li>
+                                @T("Admin.Configuration.Settings.Subscription.ReturnRequestNumberMask.Description.ID")
+                            </li>
+                            <li>
+                                @T("Admin.Configuration.Settings.Subscription.ReturnRequestNumberMask.Description.YYYY")
+                            </li>
+                            <li>
+                                @T("Admin.Configuration.Settings.Subscription.ReturnRequestNumberMask.Description.YY")
+                            </li>
+                            <li>
+                                @T("Admin.Configuration.Settings.Subscription.ReturnRequestNumberMask.Description.MM")
+                            </li>
+                            <li>
+                                @T("Admin.Configuration.Settings.Subscription.ReturnRequestNumberMask.Description.DD")
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="form-group advanced-setting">
+                    <div class="col-md-3">
+                        @Html.OverrideStoreCheckboxFor(model => model.NumberOfDaysReturnRequestAvailable_OverrideForStore, model => model.NumberOfDaysReturnRequestAvailable, Model.ActiveStoreScopeConfiguration)
+                        @Html.YStoryLabelFor(model => model.NumberOfDaysReturnRequestAvailable)
+                    </div>
+                    <div class="col-md-9">
+                        @Html.YStoryEditorFor(model => model.NumberOfDaysReturnRequestAvailable)
+                        @Html.ValidationMessageFor(model => model.NumberOfDaysReturnRequestAvailable)
+                    </div>
+                </div>
+                <div class="form-group advanced-setting">
+                    <div class="col-md-3">
+                        @Html.OverrideStoreCheckboxFor(model => model.ReturnRequestsAllowFiles_OverrideForStore, model => model.ReturnRequestsAllowFiles, Model.ActiveStoreScopeConfiguration)
+                        @Html.YStoryLabelFor(model => model.ReturnRequestsAllowFiles)
+                    </div>
+                    <div class="col-md-9">
+                        @Html.YStoryEditorFor(model => model.ReturnRequestsAllowFiles)
+                        @Html.ValidationMessageFor(model => model.ReturnRequestsAllowFiles)
+                    </div>
+                </div>
+            </div>
+        </div>
+        @Html.Partial("_ReturnRequestReasons")
+        @Html.Partial("_ReturnRequestActions")
+    </div>
+}

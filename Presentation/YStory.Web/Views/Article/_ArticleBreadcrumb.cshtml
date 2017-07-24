@@ -1,0 +1,40 @@
+﻿@model ArticleDetailsModel.ArticleBreadcrumbModel
+@using YStory.Core.Domain.Common;
+@using YStory.Core.Infrastructure;
+@using YStory.Web.Models.Catalog;
+@{
+    var breadcrumbDelimiter = EngineContext.Current.Resolve<CommonSettings>().BreadcrumbDelimiter;
+}
+@if (Model.Enabled)
+{
+    <div class="breadcrumb">
+        <ul>
+            @Html.Widget("articlebreadcrumb_before", Model.ArticleId)
+            <li>
+                <span itemscope itemtype="http://data-vocabulary.org/Breadcrumb">
+                    <a href="@Url.RouteUrl("HomePage")" itemprop="url">
+                        <span itemprop="title">@T("Articles.Breadcrumb.Top")</span>
+                    </a>
+                </span>
+                <span class="delimiter">@breadcrumbDelimiter</span>
+            </li>
+            @foreach (var category in Model.CategoryBreadcrumb)
+            {
+                <li>
+                    <span itemscope itemtype="http://data-vocabulary.org/Breadcrumb">
+                        <a href="@Url.RouteUrl("Category", new { SeName = category.SeName })" itemprop="url">
+                            <span itemprop="title">@category.Name</span>
+                        </a>
+                    </span>
+                    <span class="delimiter">@breadcrumbDelimiter</span>
+                </li>
+            }
+            <li>
+                <strong class="current-item">@Model.ArticleName</strong>
+                @*<strong class="current-item"><a href="@Url.RouteUrl("Article", new { SeName = Model.ArticleSeName })" itemprop="url">@Model.ArticleName</a></strong>*@
+                @Html.Widget("articlebreadcrumb_after", Model.ArticleId)
+            </li>
+        </ul>
+    </div>
+
+}

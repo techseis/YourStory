@@ -1,0 +1,59 @@
+﻿@{
+    Layout = "~/Views/Shared/_Root.cshtml";
+}
+@{
+    //current category ID
+    int currentCategoryId = 0;
+    if (Url.RequestContext.RouteData.Values["controller"].ToString().Equals("catalog", StringComparison.InvariantCultureIgnoreCase) &&
+        Url.RequestContext.RouteData.Values["action"].ToString().Equals("category", StringComparison.InvariantCultureIgnoreCase))
+    {
+        currentCategoryId = Convert.ToInt32(Url.RequestContext.RouteData.Values["categoryId"].ToString());
+    }
+
+
+    //current publisher ID
+    int currentPublisherId = 0;
+    if (Url.RequestContext.RouteData.Values["controller"].ToString().Equals("catalog", StringComparison.InvariantCultureIgnoreCase) &&
+        Url.RequestContext.RouteData.Values["action"].ToString().Equals("publisher", StringComparison.InvariantCultureIgnoreCase))
+    {
+        currentPublisherId = Convert.ToInt32(Url.RequestContext.RouteData.Values["publisherId"].ToString());
+    }
+
+
+    //current article ID
+    int currentArticleId = 0;
+    if (Url.RequestContext.RouteData.Values["controller"].ToString().Equals("article", StringComparison.InvariantCultureIgnoreCase) &&
+        Url.RequestContext.RouteData.Values["action"].ToString().Equals("articledetails", StringComparison.InvariantCultureIgnoreCase))
+    {
+        currentArticleId = Convert.ToInt32(Url.RequestContext.RouteData.Values["articleId"].ToString());
+    }
+}
+@if (IsSectionDefined("Breadcrumb"))
+{
+    @section Breadcrumb {
+        @RenderSection("Breadcrumb")
+    } 
+}
+<div class="side-2">
+    @if (IsSectionDefined("left"))
+    {
+        @RenderSection("left")
+    }
+    else
+    {
+        @Html.Widget("left_side_column_before")
+        @Html.Action("CategoryNavigation", "Catalog", new { currentCategoryId = currentCategoryId, currentArticleId = currentArticleId })
+        @Html.Widget("left_side_column_after_category_navigation")
+        @Html.Action("PublisherNavigation", "Catalog", new { currentPublisherId = currentPublisherId })
+        @Html.Action("ContributorNavigation", "Catalog")
+        @Html.Action("RecentlyViewedArticlesBlock", "Article", new { articleThumbPictureSize = 64 })
+        @Html.Action("PopularArticleTags", "Catalog")
+        @Html.Action("PollBlock", "Poll", new { systemKeyword = "LeftColumnPoll" })
+        @Html.Widget("left_side_column_after")
+    }
+</div>
+<div class="center-2">
+    @Html.Widget("main_column_before")
+    @RenderBody()
+    @Html.Widget("main_column_after")
+</div>

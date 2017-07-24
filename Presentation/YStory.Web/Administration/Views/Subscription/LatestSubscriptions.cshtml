@@ -1,0 +1,127 @@
+﻿@using YStory.Core
+@using YStory.Services.Common
+@using YStory.Services.Stores
+@{
+    const string panelId = "latest-subscriptions-box";
+    const string hidePanelAttributeName = "HideLatestSubscriptionsPanel";
+    var hidePanel = EngineContext.Current.Resolve<IWorkContext>().CurrentCustomer.GetAttribute<bool>(hidePanelAttributeName);
+    var gridPageSize = 5;
+    var stores = EngineContext.Current.Resolve<IStoreService>().GetAllStores();
+}
+
+<div class="box box-info @if(hidePanel){<text>collapsed-box</text>}" id="@panelId">
+    <div class="box-header with-border">
+        <h3 class="box-title">
+            <i class="fa fa-cart-plus"></i>
+            @T("Admin.Dashboard.LatestSubscriptions")
+            <a href="@Url.Action("List", "Subscription")" class="btn btn-xs btn-info btn-flat margin-l-10">@T("Admin.Dashboard.LatestSubscriptions.ViewAll")</a>
+        </h3>
+        <div class="box-tools pull-right">
+            <button class="btn btn-box-tool" data-widget="collapse">
+                @if (hidePanel)
+                {
+                    <text><i class="fa fa-plus"></i></text>
+                }
+                else
+                {
+                    <text><i class="fa fa-minus"></i></text>
+                }
+            </button>
+        </div>
+    </div>
+    <div class="box-body">
+        <div id="subscriptions-grid"></div>
+
+        <script>
+            $(document).ready(function () {
+                $('#@panelId').on('click', 'button[data-widget="collapse"]', function () {
+                    var collapsed = !$('#@panelId').hasClass('collapsed-box');
+                    saveUserPreferences('@(Url.Action("SavePreference", "Preferences"))', '@hidePanelAttributeName', collapsed);
+                });
+
+                $("#subscriptions-grid").kendoGrid({
+                    dataSource: {
+                        type: "json",
+                        transport: {
+                            read: {
+                                url: "@Html.Raw(Url.Action("SubscriptionList", "Subscription"))",
+                                type: "POST",
+                                dataType: "json",
+                                data: additionalDataLatestSubscriptions
+                            }
+                        },
+                        schema: {
+                            data: "Data",
+                            total: "Total",
+                            errors: "Errors"
+                        },
+                        error: function (e) {
+                            display_kendoui_grid_error(e);
+                            // Cancel the changes
+                            this.cancelChanges();
+                        },
+                        pageSize: @(gridPageSize),
+                        serverPaging: true,
+                        serverFiltering: true,
+                        serverSorting: true
+                    },
+                    pageable: {
+                        refresh: true,
+                        @Html.Partial("_GridPagerMessages")
+                    },
+                    scrollable: false,
+                    columns: [
+                        {
+                            field: "CustomSubscriptionNumber",
+                            title: "@T("Admin.Subscriptions.Fields.CustomSubscriptionNumber")",
+                            width: 80
+                        },
+                        {
+                            field: "SubscriptionStatus",
+                            title: "@T("Admin.Subscriptions.Fields.SubscriptionStatus")",
+                            width: 100,
+                            template: '<span class="grid-report-item ' +
+                                                    '# if(SubscriptionStatusId == 10) {# yellow #} #' +
+                                                    '# if(SubscriptionStatusId == 20) {# blue #} #' +
+                                                    '# if(SubscriptionStatusId == 30) {# green #} #' +
+                                                    '# if(SubscriptionStatusId == 40) {# red #} #' +
+                                '">#=SubscriptionStatus#</span>'
+                        },
+                        {
+                            field: "CustomerEmail",
+                            title: "@T("Admin.Subscriptions.Fields.Customer")",
+                            width: 250,
+                            template: '#=CustomerFullName# (#=CustomerEmail#)'
+                        },
+                        {
+                            field: "StoreName",
+                            hidden: @(stores.Count > 1 ? "false" : "true"),
+                            title: "@T("Admin.Subscriptions.Fields.Store")",
+                            width: 100
+                        }, {
+                            field: "CreatedOn",
+                            title: "@T("Admin.Subscriptions.Fields.CreatedOn")",
+                            width: 150,
+                            type: "date",
+                            format: "{0:G}"
+                        },
+                        {
+                            field: "Id",
+                            title: "@T("Admin.Common.View")",
+                            width: 30,
+                            headerAttributes: { style: "text-align:center" },
+                            attributes: { style: "text-align:center" },
+                            template: '<a class="btn btn-xs btn-default" href="@Url.Content("~/Admin/Subscription/Edit/")#=Id#"><i class="fa fa-eye"></i>@T("Admin.Common.View")</a>'
+                        }
+                    ]
+                });
+            });
+
+            function additionalDataLatestSubscriptions() {
+                var data = {};
+                addAntiForgeryToken(data);
+                return data;
+            }
+        </script>
+    </div>
+</div>

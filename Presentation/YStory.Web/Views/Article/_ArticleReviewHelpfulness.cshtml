@@ -1,0 +1,44 @@
+﻿@model ArticleReviewHelpfulnessModel
+@using YStory.Web.Models.Catalog;
+<div class="article-review-helpfulness">
+    <span class="question">@T("Reviews.Helpfulness.WasHelpful?")</span>
+    <span class="vote-options">
+        <span id="vote-yes-@(Model.ArticleReviewId)" class="vote">@T("Common.Yes")</span>
+        <span id="vote-no-@(Model.ArticleReviewId)" class="vote">@T("Common.No")</span>
+    </span>
+    <span class="vote-stats">
+        (<span id="helpfulness-vote-yes-@(Model.ArticleReviewId)">@(Model.HelpfulYesTotal)</span>/<span id="helpfulness-vote-no-@(Model.ArticleReviewId)">@(Model.HelpfulNoTotal)</span>)
+    </span>
+    <span id="helpfulness-vote-result-@(Model.ArticleReviewId)" class="result"></span>
+
+    
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#vote-yes-@(Model.ArticleReviewId)').click(function () {
+                setArticleReviewHelpfulness@(Model.ArticleReviewId)('true');
+            });
+            $('#vote-no-@(Model.ArticleReviewId)').click(function () {
+                setArticleReviewHelpfulness@(Model.ArticleReviewId)('false');
+            });
+        });
+
+        function setArticleReviewHelpfulness@(Model.ArticleReviewId)(wasHelpful){
+                $.ajax({
+                    cache: false,
+                    type: "POST",
+                    url: "@(Url.RouteUrl("SetArticleReviewHelpfulness"))",
+                    data: { "articleReviewId": @(Model.ArticleReviewId), "washelpful": wasHelpful },
+                    success: function (data) {
+                         $("#helpfulness-vote-yes-@(Model.ArticleReviewId)").html(data.TotalYes);
+                         $("#helpfulness-vote-no-@(Model.ArticleReviewId)").html(data.TotalNo);
+                         $("#helpfulness-vote-result-@(Model.ArticleReviewId)").html(data.Result);
+                                                  
+                         $('#helpfulness-vote-result-@(Model.ArticleReviewId)').fadeIn("slow").delay(1000).fadeOut("slow");
+                    },
+                    error:function (xhr, ajaxOptions, thrownError){
+                        alert('Failed to vote. Please refresh the page and try one more time.');
+                    }  
+                });
+        }
+    </script>
+</div>

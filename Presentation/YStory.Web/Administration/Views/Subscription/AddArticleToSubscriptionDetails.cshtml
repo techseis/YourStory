@@ -1,0 +1,142 @@
+﻿@model SubscriptionModel.AddSubscriptionArticleModel.ArticleDetailsModel
+
+@using YStory.Core.Domain.Catalog
+
+@{
+    //page title
+    ViewBag.Title = string.Format(T("Admin.Subscriptions.Articles.AddNew.Title2").Text, Model.Name, Model.SubscriptionId);
+    //active menu item (system name)
+    Html.SetActiveMenuItemSystemName("Subscriptions");
+}
+
+@*we add enctype = "multipart/form-data" because "File upload" attribute control type requires it*@
+@using (Html.BeginForm("AddArticleToSubscriptionDetails", "Subscription",
+                                                    new RouteValueDictionary(new { subscriptionId = Model.SubscriptionId, articleId = Model.ArticleId }),
+                                                    FormMethod.Post,
+                                                    new Dictionary<string, Object> { { "enctype", "multipart/form-data" }, {"id", "article-details-form" } }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(false)
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            @string.Format(T("Admin.Subscriptions.Articles.AddNew.Title2").Text, Model.Name, Model.SubscriptionId)
+            <small><i class="fa fa-arrow-circle-left"></i>@Html.ActionLink(T("Admin.Subscriptions.Articles.AddNew.BackToList").Text, "AddArticleToSubscription", new { subscriptionId = Model.SubscriptionId })</small>
+        </h1>
+        <div class="pull-right">
+            &nbsp;
+        </div>
+    </div>
+
+    <div class="content">
+        @if (Model.Warnings.Count > 0)
+        {
+            <div class="callout callout-danger">
+                <ul>
+                    @foreach (var warning in Model.Warnings)
+                    {
+                        <li>@warning</li>
+                    }
+                </ul>
+            </div>
+        }
+
+        <div class="form-horizontal">
+            <div class="panel-group">
+                @if (Model.ArticleType == ArticleType.SimpleArticle)
+                {
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div class="form-group">
+                                <div class="col-md-3">
+                                    @Html.YStoryLabelFor(model => model.UnitPriceInclTax)
+                                </div>
+                                <div class="col-md-9">
+                                    @Html.YStoryEditorFor(model => model.UnitPriceInclTax)
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3">
+                                    @Html.YStoryLabelFor(model => model.UnitPriceExclTax)
+                                </div>
+                                <div class="col-md-9">
+                                    @Html.YStoryEditorFor(model => model.UnitPriceExclTax)
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3">
+                                    @Html.YStoryLabelFor(model => model.Quantity)
+                                </div>
+                                <div class="col-md-9">
+                                    @Html.YStoryEditorFor(model => model.Quantity)
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3">
+                                    @Html.YStoryLabelFor(model => model.SubTotalInclTax)
+                                </div>
+                                <div class="col-md-9">
+                                    @Html.YStoryEditorFor(model => model.SubTotalInclTax)
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-3">
+                                    @Html.YStoryLabelFor(model => model.SubTotalExclTax)
+                                </div>
+                                <div class="col-md-9">
+                                    @Html.YStoryEditorFor(model => model.SubTotalExclTax)
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    @Html.Partial("_ArticleAddAttributes", Model.ArticleAttributes, new ViewDataDictionary() {new KeyValuePair<string, object>("articleId", Model.ArticleId)})
+
+                    var dataDictGiftCard = new ViewDataDictionary();
+                    dataDictGiftCard.TemplateInfo.HtmlFieldPrefix = "giftcard";
+                    @Html.Partial("_ArticleAddGiftCardInfo", Model.GiftCard, dataDictGiftCard)
+
+                    @Html.Partial("_ArticleAddRentalInfo", Model)
+
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            @if (!Model.AutoUpdateSubscriptionTotals)
+                            { 
+                                <div class="form-group">
+                                    <div class="col-md-9 col-md-offset-3">
+                                        <p>
+                                            <strong>@T("Admin.Subscriptions.Articles.AddNew.UpdateTotals")</strong>
+                                        </p>
+                                    </div>
+                                </div>
+                            }
+                            <div class="form-group">
+                                <div class="col-md-9 col-md-offset-3">
+                                    <button type="submit" class="btn btn-primary">
+                                        @T("Admin.Subscriptions.Articles.AddNew")
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else if (Model.ArticleType == ArticleType.GroupedArticle)
+                {
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            @*TODO add support for grouped articles to be added to an existing subscription*@
+                            Grouped articles are not currently supported for adding to an existing subscription
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            This article type (unknown) is not currently supported for adding to an existing subscription
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}

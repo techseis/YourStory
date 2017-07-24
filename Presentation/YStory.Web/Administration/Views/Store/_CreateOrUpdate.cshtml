@@ -1,0 +1,151 @@
+﻿@model StoreModel
+
+@Html.ValidationSummary(true)
+@Html.HiddenFor(model => model.Id)
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#@Html.FieldIdFor(model => model.SslEnabled)").click(toggleSslEnabled);
+        toggleSslEnabled();
+    });
+
+    function toggleSslEnabled() {
+        if ($('#@Html.FieldIdFor(model => model.SslEnabled)').is(':checked')) {
+            $('#pnlSecureUrl').show();
+        } else {
+            $('#pnlSecureUrl').hide();
+        }
+    }
+</script>
+
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    @(Html.LocalizedEditor<StoreModel, StoreLocalizedModel>("store-localized",
+                    @<div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.YStoryLabelFor(model => model.Locales[item].Name)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.Locales[item].Name)
+                                @Html.ValidationMessageFor(model => model.Locales[item].Name)
+                            </div>
+                        </div>
+                        @Html.HiddenFor(model => model.Locales[item].LanguageId)
+                    </div>
+    ,
+                    @<div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.YStoryLabelFor(model => model.Name)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.Name, required: true)
+                                @Html.ValidationMessageFor(model => model.Name)
+                            </div>
+                        </div>
+                    </div>
+    ))
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.Url)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryEditorFor(model => model.Url, required: true)
+                            @Html.ValidationMessageFor(model => model.Url)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.SslEnabled)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryEditorFor(model => model.SslEnabled)
+                            @Html.ValidationMessageFor(model => model.SslEnabled)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-9 col-md-offset-3">
+                            <em>@T("Admin.Configuration.Stores.Fields.SslEnabled.Hint2")</em>
+                        </div>
+                    </div>
+                    <div class="form-group" id="pnlSecureUrl">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.SecureUrl)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryEditorFor(model => model.SecureUrl)
+                            @Html.ValidationMessageFor(model => model.SecureUrl)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.Hosts)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryEditorFor(model => model.Hosts)
+                            @Html.ValidationMessageFor(model => model.Hosts)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.DefaultLanguageId)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryDropDownListFor(model => model.DefaultLanguageId, Model.AvailableLanguages)
+                            @Html.ValidationMessageFor(model => model.DefaultLanguageId)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.DisplaySubscription)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryEditorFor(model => model.DisplaySubscription)
+                            @Html.ValidationMessageFor(model => model.DisplaySubscription)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.CompanyName)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryEditorFor(model => model.CompanyName)
+                            @Html.ValidationMessageFor(model => model.CompanyName)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.CompanyAddress)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryEditorFor(model => model.CompanyAddress)
+                            @Html.ValidationMessageFor(model => model.CompanyAddress)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.CompanyPhoneNumber)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryEditorFor(model => model.CompanyPhoneNumber)
+                            @Html.ValidationMessageFor(model => model.CompanyPhoneNumber)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.CompanyVat)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryEditorFor(model => model.CompanyVat)
+                            @Html.ValidationMessageFor(model => model.CompanyVat)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

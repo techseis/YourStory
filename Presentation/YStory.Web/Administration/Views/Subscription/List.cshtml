@@ -1,0 +1,571 @@
+﻿@using YStory.Services.Stores
+@model SubscriptionListModel
+
+@{
+    var defaultGridPageSize = EngineContext.Current.Resolve<YStory.Core.Domain.Common.AdminAreaSettings>().DefaultGridPageSize;
+    var gridPageSizes = EngineContext.Current.Resolve<YStory.Core.Domain.Common.AdminAreaSettings>().GridPageSizes;
+    var stores = EngineContext.Current.Resolve<IStoreService>().GetAllStores();
+
+    //page title
+    ViewBag.Title = T("Admin.Subscriptions").Text;
+    //active menu item (system name)
+    Html.SetActiveMenuItemSystemName("Subscriptions");
+}
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            @T("Admin.Subscriptions")
+        </h1>
+        <div class="pull-right">
+            <div class="btn-group">
+                <button type="button" class="btn btn-success">
+                    <i class="fa fa-download"></i>
+                    @T("Admin.Common.Export")
+                </button>
+                <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                    <span class="caret"></span>
+                    <span class="sr-only">&nbsp;</span>
+                </button>
+                <ul class="dropdown-menu" role="menu">
+                    <li>
+                        <button type="submit" name="exportxml-all">
+                            <i class="fa fa-file-code-o"></i>
+                            @T("Admin.Common.ExportToXml.All")
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" id="exportxml-selected">
+                            <i class="fa fa-file-code-o"></i>
+                            @T("Admin.Common.ExportToXml.Selected")
+                        </button>
+                    </li>
+                    <li class="divider"></li>
+                    <li>
+                        <button type="submit" name="exportexcel-all">
+                            <i class="fa fa-file-excel-o"></i>
+                            @T("Admin.Common.ExportToExcel.All")
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" id="exportexcel-selected">
+                            <i class="fa fa-file-excel-o"></i>
+                            @T("Admin.Common.ExportToExcel.Selected")
+                        </button>
+                    </li>
+                </ul>
+            </div>
+            <div class="btn-group">
+                <button type="button" class="btn bg-purple">
+                    <i class="fa fa-file-pdf-o"></i>
+                    @T("Admin.Subscriptions.PdfInvoices")
+                </button>
+                <button type="button" class="btn bg-purple dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                    <span class="caret"></span>
+                    <span class="sr-only">&nbsp;</span>
+                </button>
+                <ul class="dropdown-menu" role="menu">
+                    <li>
+                        <button type="submit" name="pdf-invoice-all">
+                            @T("Admin.Subscriptions.PdfInvoices.All")
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" id="pdf-invoice-selected">
+                            @T("Admin.Subscriptions.PdfInvoices.Selected")
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <div class="panel panel-default panel-search">
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-5">
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        @Html.YStoryLabelFor(model => model.StartDate)
+                                    </div>
+                                    <div class="col-md-8">
+                                        @Html.YStoryEditorFor(model => model.StartDate)
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        @Html.YStoryLabelFor(model => model.EndDate)
+                                    </div>
+                                    <div class="col-md-8">
+                                        @Html.YStoryEditorFor(model => model.EndDate)
+                                    </div>
+                                </div>
+                                <div class="form-group" @(Model.AvailableWarehouses.SelectionIsNotPossible() ? Html.Raw("style=\"display:none\"") : null)>
+                                    <div class="col-md-4">
+                                        @Html.YStoryLabelFor(model => model.WarehouseId)
+                                    </div>
+                                    <div class="col-md-8">
+                                        @Html.YStoryDropDownList("WarehouseId", Model.AvailableWarehouses)
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        @Html.YStoryLabelFor(model => model.ArticleId)
+                                    </div>
+                                    <div class="col-md-8">
+                                        <input type="text" id="search-article-name" autocomplete="off" class="form-control" />
+                                        <span id="search-article-friendly-name"></span>
+                                        <button type="button" id="search-article-clear" class="btn bg-gray" style="display: none; margin-top: 5px;">@T("Admin.Common.Clear")</button>
+
+                                        @Html.TextBoxFor(model => model.ArticleId, new { autocomplete = "off", style = "display:none;" })
+                                        <script type="text/javascript">
+                                            $(document).ready(function() {
+                                                $('#search-article-name').autocomplete({
+                                                    delay: 500,
+                                                    minLength: 3,
+                                                    source: '@(Url.Action("ArticleSearchAutoComplete"))',
+                                                    select: function(event, ui) {
+                                                        $('#@Html.FieldIdFor(model => model.ArticleId)').val(ui.item.articleid);
+                                                        $('#search-article-friendly-name').text(ui.item.label);
+
+                                                        $('#search-article-clear').show();
+                                                        return false;
+                                                    }
+                                                });
+
+                                                //remove button
+                                                $('#search-article-clear').click(function() {
+                                                    $('#@Html.FieldIdFor(model => model.ArticleId)').val('0');
+                                                    $('#search-article-friendly-name').text('');
+                                                    $('#search-article-clear').hide();
+                                                    return false;
+                                                });
+                                            });
+                                        </script>
+                                    </div>
+                                </div>
+                                <div class="form-group" @(Model.IsLoggedInAsContributor ? Html.Raw("style='display: none;'") : null)>
+                                    <div class="col-md-4">
+                                        @Html.YStoryLabelFor(model => model.SubscriptionStatusIds)
+                                    </div>
+                                    <div class="col-md-8">
+                                        @Html.EditorFor(model => model.SubscriptionStatusIds, new { SelectList = Model.AvailableSubscriptionStatuses })
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        @Html.YStoryLabelFor(model => model.PaymentStatusIds)
+                                    </div>
+                                    <div class="col-md-8">
+                                        @Html.EditorFor(model => model.PaymentStatusIds, new { SelectList = Model.AvailablePaymentStatuses })
+                                    </div>
+                                </div>
+                                <div class="form-group" @(Model.IsLoggedInAsContributor ? Html.Raw("style='display: none;'") : null)>
+                                    <div class="col-md-4">
+                                        @Html.YStoryLabelFor(model => model.ShippingStatusIds)
+                                    </div>
+                                    <div class="col-md-8">
+                                        @Html.EditorFor(model => model.ShippingStatusIds, new { SelectList = Model.AvailableShippingStatuses })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-7">
+                                <div class="form-group" @(Model.AvailableStores.SelectionIsNotPossible() ? Html.Raw("style=\"display:none\"") : null)>
+                                    <div class="col-md-4">
+                                        @Html.YStoryLabelFor(model => model.StoreId)
+                                    </div>
+                                    <div class="col-md-8">
+                                        @Html.YStoryDropDownList("StoreId", Model.AvailableStores)
+                                    </div>
+                                </div>
+                                <div class="form-group" @(Model.AvailableContributors.SelectionIsNotPossible() || Model.IsLoggedInAsContributor ? Html.Raw("style='display: none;'") : null)>
+                                    <div class="col-md-4">
+                                        @Html.YStoryLabelFor(model => model.ContributorId)
+                                    </div>
+                                    <div class="col-md-8">
+                                        @Html.YStoryDropDownList("ContributorId", Model.AvailableContributors)
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        @Html.YStoryLabelFor(model => model.BillingEmail)
+                                    </div>
+                                    <div class="col-md-8">
+                                        @Html.YStoryEditorFor(model => model.BillingEmail)
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        @Html.YStoryLabelFor(model => model.BillingLastName)
+                                    </div>
+                                    <div class="col-md-8">
+                                        @Html.YStoryEditorFor(model => model.BillingLastName)
+                                    </div>
+                                </div>
+                                <div class="form-group" @(Model.AvailableCountries.SelectionIsNotPossible() ? Html.Raw("style=\"display:none\"") : null)>
+                                    <div class="col-md-4">
+                                        @Html.YStoryLabelFor(model => model.BillingCountryId)
+                                    </div>
+                                    <div class="col-md-8">
+                                        @Html.YStoryDropDownList("BillingCountryId", Model.AvailableCountries)
+                                    </div>
+                                </div>
+                                <div class="form-group" @(Model.AvailablePaymentMethods.SelectionIsNotPossible() || Model.IsLoggedInAsContributor ? Html.Raw("style='display: none;'") : null)>
+                                    <div class="col-md-4">
+                                        @Html.YStoryLabelFor(model => model.PaymentMethodSystemName)
+                                    </div>
+                                    <div class="col-md-8">
+                                        @Html.YStoryDropDownList("PaymentMethodSystemName", Model.AvailablePaymentMethods)
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        @Html.YStoryLabelFor(model => model.SubscriptionNotes)
+                                    </div>
+                                    <div class="col-md-8">
+                                        @Html.YStoryEditorFor(model => model.SubscriptionNotes)
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        @Html.YStoryLabelFor(model => model.GoDirectlyToCustomSubscriptionNumber)
+                                    </div>
+                                    <div class="col-md-8">
+                                        <div class="input-group input-group-short">
+                                            @Html.YStoryEditorFor(model => model.GoDirectlyToCustomSubscriptionNumber)
+                                            <span class="input-group-btn">
+                                                <button type="submit" id="go-to-subscription-by-number" name="go-to-subscription-by-number" class="btn btn-info btn-flat">
+                                                    @T("Admin.Common.Go")
+                                                </button>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-7 col-md-offset-5">
+                                <button type="button" id="search-subscriptions" class="btn btn-primary btn-search">
+                                    <i class="fa fa-search"></i>
+                                    @T("Admin.Common.Search")
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div id="subscriptions-grid"></div>
+
+                        <script>
+                            $(document).ready(function() {
+                                $("#subscriptions-grid").kendoGrid({
+                                    dataSource: {
+                                        type: "json",
+                                        transport: {
+                                            read: {
+                                                url: "@Html.Raw(Url.Action("SubscriptionList", "Subscription"))",
+                                                type: "POST",
+                                                dataType: "json",
+                                                data: additionalData
+                                            }
+                                        },
+                                        schema: {
+                                            data: "Data",
+                                            total: "Total",
+                                            errors: "Errors"
+                                        },
+                                        requestEnd: function (e) {
+                                            if (e.type == "read") {
+                                                var response = e.response;
+                                                if (response) {
+                                                    //store extra data
+                                                    reportAggregates = e.response["ExtraData"];
+                                                }
+                                            }
+                                        },
+                                        error: function(e) {
+                                            display_kendoui_grid_error(e);
+                                            // Cancel the changes
+                                            this.cancelChanges();
+                                        },
+                                        pageSize: @(defaultGridPageSize),
+                                        serverPaging: true,
+                                        serverFiltering: true,
+                                        serverSorting: true
+                                    },
+                                    pageable: {
+                                        refresh: true,
+                                        pageSizes: [@(gridPageSizes)],
+                                        @Html.Partial("_GridPagerMessages")
+                                    },
+                                    editable: {
+                                        confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                                        mode: "inline"
+                                    },
+                                    scrollable: false,
+                                    dataBound: onDataBound,
+                                    columns: [
+                                        {
+                                            field: "Id",
+                                            headerTemplate: "<input id='mastercheckbox' type='checkbox'/>",
+                                            headerAttributes: { style: "text-align:center" },
+                                            attributes: { style: "text-align:center" },
+                                            template: "<input type='checkbox' value='#=Id#' class='checkboxGroups'/>",
+                                            width: 50
+                                        }, {
+                                            field: "CustomSubscriptionNumber",
+                                            title: "@T("Admin.Subscriptions.Fields.CustomSubscriptionNumber")",
+                                            width: 80
+                                        },
+                                        @if (!Model.IsLoggedInAsContributor)
+                                        {
+                                            //a contributor does not have access to this functionality
+                                            <text>{
+                                            field: "SubscriptionStatus",
+                                            title: "@T("Admin.Subscriptions.Fields.SubscriptionStatus")",
+                                            width: 100,
+                                            template: '<span class="grid-report-item ' +
+                                                '# if(SubscriptionStatusId == 10) {# yellow #} #' +
+                                                '# if(SubscriptionStatusId == 20) {# blue #} #' +
+                                                '# if(SubscriptionStatusId == 30) {# green #} #' +
+                                                '# if(SubscriptionStatusId == 40) {# red #} #' +
+                                                '">#=SubscriptionStatus#</span>'
+                                        },</text>
+                                        }
+                                        {
+                                            field: "PaymentStatus",
+                                            title: "@T("Admin.Subscriptions.Fields.PaymentStatus")",
+                                            width: 150
+                                        },
+                                        @if (!Model.IsLoggedInAsContributor)
+                                        {
+                                            //a contributor does not have access to this functionality
+                                            <text>{
+                                            field: "ShippingStatus",
+                                            title: "@T("Admin.Subscriptions.Fields.ShippingStatus")",
+                                            width: 150
+                                        },</text>
+                                        }
+                                        {
+                                            field: "CustomerEmail",
+                                            title: "@T("Admin.Subscriptions.Fields.Customer")",
+                                            width: 250,
+                                            template: '#=CustomerFullName# (#=CustomerEmail#)'
+                                        },
+                                        {
+                                            field: "StoreName",
+                                            hidden: @(stores.Count > 1 ? "false" : "true"),
+                                            title: "@T("Admin.Subscriptions.Fields.Store")",
+                                            width: 100
+                                        }, {
+                                            field: "CreatedOn",
+                                            title: "@T("Admin.Subscriptions.Fields.CreatedOn")",
+                                            width: 150,
+                                            type: "date",
+                                            format: "{0:G}"
+                                        },
+                                        @if (!Model.IsLoggedInAsContributor)
+                                        {
+                                            //a contributor does not have access to this functionality
+                                            <text>{
+                                            field: "SubscriptionTotal",
+                                            title: "@T("Admin.Subscriptions.Fields.SubscriptionTotal")",
+                                            width: 100,
+                                            footerTemplate: '<div><strong>@T("Admin.Subscriptions.Report.Summary")</strong></div>' +
+                                                                    '<div>@T("Admin.Subscriptions.Report.Profit") <span id=\"aggregator-profit-block\"></span></div>' +
+                                                                    '<div>@T("Admin.Subscriptions.Report.Shipping") <span id=\"aggregator-shipping-block\"></span></div>' +
+                                                                    '<div>@T("Admin.Subscriptions.Report.Tax") <span id=\"aggregator-tax-block\"></span></div>' +
+                                                                    '<div>@T("Admin.Subscriptions.Report.Total") <span id=\"aggregator-total-block\"></span></div>'
+                                        },</text>
+                                        }
+                                        {
+                                            field: "Id",
+                                            title: "@T("Admin.Common.View")",
+                                            width: 50,
+                                            headerAttributes: { style: "text-align:center" },
+                                            attributes: { style: "text-align:center" },
+                                            template: '<a class="btn btn-default" href="Edit/#=Id#"><i class="fa fa-eye"></i>@T("Admin.Common.View")</a>'
+                                        }
+                                    ]
+                                } );
+                            });
+                        </script>
+
+                        <script type="text/javascript">
+                            var selectedIds = [];
+                            var reportAggregates = "";
+
+                            $(document).ready(function () {
+                                //search button
+                                $('#search-subscriptions').click(function () {
+                                    //search
+                                    var grid = $('#subscriptions-grid').data('kendoGrid');
+                                    grid.dataSource.page(1); //new search. Set page size to 1
+                                    //grid.dataSource.read(); we already loaded the grid above using "page" function
+                                    //clear selected checkboxes
+                                    $('.checkboxGroups').attr('checked', false).change();
+                                    selectedIds = [];
+                                    return false;
+                                });
+
+                                $("".concat("#@Html.FieldIdFor(model => model.BillingEmail),",
+                                    "#@Html.FieldIdFor(model => model.BillingLastName),",
+                                    "#@Html.FieldIdFor(model => model.SubscriptionNotes)")).keydown(function (event) {
+                                        if (event.keyCode === 13) {
+                                            $("#search-subscriptions").click();
+                                            return false;
+                                        }
+                                    });
+
+                                $("#@Html.FieldIdFor(model => model.GoDirectlyToCustomSubscriptionNumber)").keydown(function(event) {
+                                    if (event.keyCode === 13) {
+                                        $("#go-to-subscription-by-number").click();
+                                        return false;
+                                    }
+                                });
+
+                                $('#mastercheckbox').click(function () {
+                                    $('.checkboxGroups').attr('checked', $(this).is(':checked')).change();
+                                });
+
+                                //wire up checkboxes.
+                                $('#subscriptions-grid').on('change', 'input[type=checkbox][id!=mastercheckbox][class=checkboxGroups]', function (e) {
+                                    var $check = $(this);
+                                    if ($check.is(":checked") == true) {
+                                        var checked = jQuery.inArray($check.val(), selectedIds);
+                                        if (checked == -1) {
+                                            //add id to selectedIds.
+                                            selectedIds.push($check.val());
+                                        }
+                                    }
+                                    else {
+                                        var checked = jQuery.inArray($check.val(), selectedIds);
+                                        if (checked > -1) {
+                                            //remove id from selectedIds.
+                                            selectedIds = $.grep(selectedIds, function (item, index) {
+                                                return item != $check.val();
+                                            });
+                                        }
+                                    }
+                                    updateMasterCheckbox();
+                                });
+                            });
+
+                            function additionalData() {
+                                var data = {
+                                    StartDate: $('#@Html.FieldIdFor(model => model.StartDate)').val(),
+                                    EndDate: $('#@Html.FieldIdFor(model => model.EndDate)').val(),
+                                    SubscriptionStatusIds: $('#@Html.FieldIdFor(model => model.SubscriptionStatusIds)').val(),
+                                    PaymentStatusIds: $('#@Html.FieldIdFor(model => model.PaymentStatusIds)').val(),
+                                    ShippingStatusIds: $('#@Html.FieldIdFor(model => model.ShippingStatusIds)').val(),
+                                    StoreId: $('#@Html.FieldIdFor(model => model.StoreId)').val(),
+                                    ContributorId: $('#@Html.FieldIdFor(model => model.ContributorId)').val(),
+                                    WarehouseId: $('#@Html.FieldIdFor(model => model.WarehouseId)').val(),
+                                    BillingEmail: $('#@Html.FieldIdFor(model => model.BillingEmail)').val(),
+                                    BillingLastName: $('#@Html.FieldIdFor(model => model.BillingLastName)').val(),
+                                    BillingCountryId: $('#@Html.FieldIdFor(model => model.BillingCountryId)').val(),
+                                    PaymentMethodSystemName: $('#@Html.FieldIdFor(model => model.PaymentMethodSystemName)').val(),
+                                    ArticleId: $('#@Html.FieldIdFor(model => model.ArticleId)').val(),
+                                    SubscriptionNotes: $('#@Html.FieldIdFor(model => model.SubscriptionNotes)').val()
+                                };
+                                addAntiForgeryToken(data);
+                                return data;
+                            }
+
+                            function onDataBound(e) {
+                                $('#subscriptions-grid input[type=checkbox][id!=mastercheckbox][class=checkboxGroups]').each(function () {
+                                    var currentId = $(this).val();
+                                    var checked = jQuery.inArray(currentId, selectedIds);
+                                    //set checked based on if current checkbox's value is in selectedIds.
+                                    $(this).attr('checked', checked > -1);
+                                });
+
+                                updateMasterCheckbox();
+
+                                //update subscription totals summary
+                                if (reportAggregates != "") {
+                                    for (var key in reportAggregates) {
+                                        $('#aggregator-profit-block').text(reportAggregates['aggregatorprofit']);
+                                        $('#aggregator-shipping-block').text(reportAggregates['aggregatorshipping']);
+                                        $('#aggregator-tax-block').text(reportAggregates['aggregatortax']);
+                                        $('#aggregator-total-block').text(reportAggregates['aggregatortotal']);
+                                    }
+                                }
+                            }
+
+                            function updateMasterCheckbox() {
+                                var numChkBoxes = $('#subscriptions-grid input[type=checkbox][id!=mastercheckbox][class=checkboxGroups]').length;
+                                var numChkBoxesChecked = $('#subscriptions-grid input[type=checkbox][id!=mastercheckbox][class=checkboxGroups]:checked').length;
+                                $('#mastercheckbox').attr('checked', numChkBoxes == numChkBoxesChecked && numChkBoxes > 0);
+                            }
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@*export selected (XML). We don't use GET approach because it's limited to 2K-4K chars and won't work for large number of entities*@
+@using (Html.BeginForm("ExportXmlSelected", "Subscription", FormMethod.Post, new { id = "export-xml-selected-form" }))
+{
+    @Html.AntiForgeryToken()
+    <input type="hidden" id="selectedIds" name="selectedIds" value="" />
+}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#exportxml-selected').click(function (e) {
+            e.preventDefault();
+            var ids = selectedIds.join(",");
+            $('#export-xml-selected-form #selectedIds').val(ids);
+            $('#export-xml-selected-form').submit();
+            return false;
+        });
+    });
+</script>
+
+@*export selected (Excel). We don't use GET approach because it's limited to 2K-4K chars and won't work for large number of entities*@
+@using (Html.BeginForm("ExportExcelSelected", "Subscription", FormMethod.Post, new { id = "export-excel-selected-form" }))
+{
+    @Html.AntiForgeryToken()
+    <input type="hidden" id="selectedIds" name="selectedIds" value="" />
+}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#exportexcel-selected').click(function (e) {
+            e.preventDefault();
+            var ids = selectedIds.join(",");
+            $('#export-excel-selected-form #selectedIds').val(ids);
+            $('#export-excel-selected-form').submit();
+            return false;
+        });
+    });
+</script>
+
+@*Print packaging slips selected (XML). We don't use GET approach because it's limited to 2K-4K chars and won't work for large number of entities*@
+@using (Html.BeginForm("PdfInvoiceSelected", "Subscription", FormMethod.Post, new { id = "pdf-invoice-selected-form" }))
+{
+    @Html.AntiForgeryToken()
+    <input type="hidden" id="selectedIds" name="selectedIds" value="" />
+}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#pdf-invoice-selected').click(function (e) {
+            e.preventDefault();
+            var ids = selectedIds.join(",");
+            $('#pdf-invoice-selected-form #selectedIds').val(ids);
+            $('#pdf-invoice-selected-form').submit();
+            return false;
+        });
+    });
+</script>

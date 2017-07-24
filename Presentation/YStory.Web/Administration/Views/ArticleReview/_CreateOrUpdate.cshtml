@@ -1,0 +1,121 @@
+﻿@model ArticleReviewModel
+
+@Html.ValidationSummary(false)
+@Html.HiddenFor(model => model.Id)
+
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.ArticleName)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.ActionLink(Model.ArticleName, "Edit", "Article", new { id = Model.ArticleId }, new { })
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.StoreName)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryDisplayFor(model => model.StoreName)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.CustomerInfo)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.ActionLink(Model.CustomerInfo, "Edit", "Customer", new { id = Model.CustomerId }, new { })
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.Title)
+                        </div>
+                        <div class="col-md-9">
+                            @if (Model.IsLoggedInAsContributor)
+                            {
+                                @Html.YStoryDisplayFor(model => model.Title)
+                            }
+                            else
+                            {
+                                @Html.YStoryEditorFor(model => model.Title, required: true)
+                                @Html.ValidationMessageFor(model => model.Title)
+                            }
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.ReviewText)
+                        </div>
+                        <div class="col-md-9">
+                            @if (Model.IsLoggedInAsContributor)
+                            {
+                                @Html.Raw(YStory.Core.Html.HtmlHelper.FormatText(Model.ReviewText, false, true, false, false, false, false))
+                            }
+                            else
+                            {
+                                @Html.YStoryTextAreaFor(model => model.ReviewText, required: true)
+                                @Html.ValidationMessageFor(model => model.ReviewText)
+                            }
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.ReplyText)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryTextAreaFor(model => model.ReplyText)
+                            @Html.ValidationMessageFor(model => model.ReplyText)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.Rating)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryDisplayFor(model => model.Rating)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.IsApproved)
+                        </div>
+                        <div class="col-md-9">
+                            @if (Model.IsLoggedInAsContributor)
+                            {
+                                <div class="form-text-row">
+                                    @if (Model.IsApproved)
+                                    {
+                                        <i class="fa fa-check true-icon"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="fa fa-close false-icon"></i>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                @Html.YStoryEditorFor(model => model.IsApproved)
+                                @Html.ValidationMessageFor(model => model.IsApproved)
+                            }
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.CreatedOn)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryDisplayFor(model => model.CreatedOn)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

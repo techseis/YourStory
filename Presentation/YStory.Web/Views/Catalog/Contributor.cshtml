@@ -1,0 +1,72 @@
+﻿@model ContributorModel
+@{
+    Layout = "~/Views/Shared/_ColumnsTwo.cshtml";
+
+    //title
+    Html.AddTitleParts(!String.IsNullOrEmpty(Model.MetaTitle) ? Model.MetaTitle : Model.Name);
+    //meta
+    Html.AddMetaDescriptionParts(Model.MetaDescription);
+    Html.AddMetaKeywordParts(Model.MetaKeywords);
+    //page class
+    Html.AppendPageCssClassParts("html-contributor-page");
+
+    var canonicalUrlsEnabled = EngineContext.Current.Resolve<SeoSettings>().CanonicalUrlsEnabled;
+    if (canonicalUrlsEnabled)
+    {
+        var contributorUrl = Url.RouteUrl("Contributor", new { SeName = Model.SeName }, this.Request.Url.Scheme);
+        Html.AddCanonicalUrlParts(contributorUrl);
+    }
+}
+@using YStory.Core.Domain.Seo;
+@using YStory.Core.Infrastructure;
+@using YStory.Web.Models.Catalog;
+<div class="page contributor-page">
+    <div class="page-title">
+        <h1>@Model.Name</h1>
+    </div>
+    <div class="page-body">
+        @Html.Widget("contributordetails_top", Model.Id)
+        @*description*@
+        @if (!String.IsNullOrWhiteSpace(Model.Description))
+        {
+            <div class="contributor-description">
+                @Html.Raw(Model.Description)
+            </div>
+        }
+        @*contact contributor*@
+        @if (Model.AllowCustomersToContactContributors)
+        {
+            <div class="contact-contributor">
+                <input type="button" value="@T("ContactContributor")" class="button-2 contact-contributor-button" onclick="setLocation('@Url.RouteUrl("ContactContributor", new { contributorId = Model.Id })')" />
+            </div>
+        }
+        @if (Model.Articles.Count > 0)
+        {
+            @Html.Partial("_CatalogSelectors", Model.PagingFilteringContext, new ViewDataDictionary())
+        }
+        @*article list*@
+        @if (Model.Articles.Count > 0)
+        {
+            <div class="@(Model.PagingFilteringContext.ViewMode == "list" ? "article-list" : "article-grid")">
+                <div class="item-grid">
+                    @foreach (var article in Model.Articles)
+                    {
+                        <div class="item-box">
+                            @Html.Partial("_ArticleBox", article)
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+        @{
+            var pager = Html.Pager(Model.PagingFilteringContext).QueryParam("pagenumber");
+        }
+        @if (!pager.IsEmpty())
+        {
+            <div class="pager">
+                @pager
+            </div>
+        }
+        @Html.Widget("contributordetails_bottom", Model.Id)
+    </div>
+</div>

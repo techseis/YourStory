@@ -1,0 +1,17 @@
+﻿@model IList<ArticleOverviewModel>
+
+@using YStory.Web.Models.Catalog;
+@if (Model.Count > 0)
+{
+    <div class="also-purchased-articles-grid article-grid">
+        <div class="title">
+            <strong>@T("Articles.AlsoPurchased")</strong>
+        </div>
+        <div class="item-grid">
+            @foreach (var item in Model)
+            {
+                <div class="item-box">@Html.Partial("_ArticleBox", item)</div>
+            }
+        </div>
+    </div>
+}

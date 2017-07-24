@@ -1,0 +1,980 @@
+﻿@model ArticleModel
+
+@using YStory.Core.Domain.Catalog;
+@using YStory.Services.Catalog;
+@using System.Text;
+@using YStory.Services
+@using YStory.Services.Stores
+
+@{
+    var stores = EngineContext.Current.Resolve<IStoreService>().GetAllStores();
+
+    //resources for article tags input
+    Html.AppendCssFileParts("~/Administration/Content/tagEditor/jquery.tag-editor.css");
+    Html.AppendScriptParts("~/Administration/Scripts/tagEditor/jquery.tag-editor.min.js");
+    Html.AppendScriptParts("~/Administration/Scripts/tagEditor/jquery.caret.min.js");
+}
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        @if (!Model.IsLoggedInAsContributor)
+        {
+            <text>$("#@Html.FieldIdFor(model => model.ShowOnHomePage)").click(toggleShowOnHomePage);</text>
+        }
+        $("#@Html.FieldIdFor(model => model.ArticleTypeId)").change(toggleArticleType);
+        $("#@Html.FieldIdFor(model => model.MarkAsNew)").click(toggleMarkAsNew);
+
+        @if (!Model.IsLoggedInAsContributor)
+        {
+            <text>toggleShowOnHomePage();</text>
+        }
+        toggleArticleType();
+    });
+
+    function toggleShowOnHomePage() {
+        if ($('#@Html.FieldIdFor(model => model.ShowOnHomePage)').is(':checked')) {
+            $('#pnlDisplaySubscription').show();
+        } else {
+            $('#pnlDisplaySubscription').hide();
+        }
+    }
+
+    function toggleArticleType() {
+        var simpleArticleId = "@((int)ArticleType.SimpleArticle)";
+        var groupedArticleId = "@((int)ArticleType.GroupedArticle)";
+
+
+        var selectedArticleTypeId = $("#@Html.FieldIdFor(model => model.ArticleTypeId)").val();
+        if (!selectedArticleTypeId || selectedArticleTypeId == simpleArticleId) {
+            
+            
+        } else if (selectedArticleTypeId == groupedArticleId) {
+            
+        }
+
+        //templates
+        var articleTypeSupportedValues = {};
+        @foreach (var kvp in Model.ArticlesTypesSupportedByArticleTemplates)
+        {
+            <text>articleTypeSupportedValues['@(kvp.Key)'] = {};</text>
+            foreach (var item in kvp.Value)
+            {
+                <text>articleTypeSupportedValues['@(kvp.Key)']['@(item.Value)'] = '@Html.Raw(HttpUtility.JavaScriptStringEncode((item.Text)))';</text>
+            }
+        }
+        var articleTemplateDropddown = $("#@Html.FieldIdFor(model => model.ArticleTemplateId)");
+        var articleTemplateSelectedValue = articleTemplateDropddown.val();
+        articleTemplateDropddown.empty();
+        for (var name in articleTypeSupportedValues[selectedArticleTypeId]) {
+            articleTemplateDropddown.append($("<option></option>").attr("value", name).text(articleTypeSupportedValues[selectedArticleTypeId][name]));
+        }
+        //previously selected value
+        $('#@Html.FieldIdFor(model => model.ArticleTemplateId) option').each(function(){
+            if (this.value == articleTemplateSelectedValue) {
+                articleTemplateDropddown.val(articleTemplateSelectedValue);
+            }
+        });
+
+        if ($('#@Html.FieldIdFor(model => model.ArticleTemplateId) option').length > 1) {
+            $('#pnlArticleTemplateId').show();
+        } else {
+            $('#pnlArticleTemplateId').hide();
+        }
+    }
+
+    
+
+        
+
+    function toggleMarkAsNew() {
+        if ($('#@Html.FieldIdFor(model => model.MarkAsNew)').is(':checked')) {
+            $('#pnlMarkAsNewStartDateTimeUtc').show();
+            $('#pnlMarkAsNewEndDateTimeUtc').show();
+        } else {
+            $('#pnlMarkAsNewStartDateTimeUtc').hide();
+            $('#pnlMarkAsNewEndDateTimeUtc').hide();
+        }
+    }
+
+    @{
+        //TODO move to Model
+        var articleTags = EngineContext.Current.Resolve<IArticleTagService>().GetAllArticleTags();
+        var articleTagsSb = new StringBuilder();
+        articleTagsSb.Append("var initialArticleTags = [");
+        for (int i = 0; i < articleTags.Count; i++)
+        {
+            var tag = articleTags[i];
+            articleTagsSb.Append("'");
+            articleTagsSb.Append(HttpUtility.JavaScriptStringEncode(tag.Name));
+            articleTagsSb.Append("'");
+            if (i != articleTags.Count - 1)
+            {
+                articleTagsSb.Append(",");
+            }
+        }
+        articleTagsSb.Append("]");
+    }
+
+    //tags
+    $(document).ready(function() {
+        @Html.Raw(articleTagsSb.ToString())
+        $("#@Html.FieldIdFor(model => model.ArticleTags)").tagEditor({
+            autocomplete: {
+                delay: 0,
+                position: { collision: 'flip' },
+                source: initialArticleTags
+            },
+            delimiter: ',',
+            placeholder: '@T("Admin.Catalog.Articles.Fields.ArticleTags.Placeholder")'
+        });
+    });
+
+    //required article friendly names
+    $(document).ready(function() {
+        loadRequiredArticleFriendlyNames();
+    });
+
+    $(document).ready(function() {
+        $('#@Html.FieldIdFor(model => model.RequiredArticleIds)')
+            .data('timeout', null)
+            .keyup(function() {
+                clearTimeout($(this).data('timeout'));
+                //one second timeout
+                $(this).data('timeout', setTimeout(loadRequiredArticleFriendlyNames, 1000));
+            });
+    });
+
+    function loadRequiredArticleFriendlyNames() {
+        var inputValue = $('#@Html.FieldIdFor(model => model.RequiredArticleIds)').val();
+        if (inputValue) {
+            //load friendly names
+            $('#required-articles-check-progress').show();
+
+            var postData = {
+                articleIds: inputValue
+            };
+            addAntiForgeryToken(postData);
+
+            $.ajax({
+                cache: false,
+                type: 'POST',
+                url: '@Url.Action("LoadArticleFriendlyNames", "Article")',
+                data: postData,
+                dataType: 'json',
+                success: function(data) {
+                    $('#required-articles-check-progress').hide();
+                    $('#required-article-names').text(data.Text);
+                },
+                failure: function() {
+                    $('#required-articles-check-progress').hide();
+                    $('#required-article-names').text('');
+                }
+            });
+        } else {
+            $('#required-article-names').text('');
+        }
+    }
+</script>
+
+<div class="raw clearfix">
+    <div class="@(Model.ArticleEditorSettingsModel.OneColumnArticlePage ? "col-md-12" : "col-md-7")">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    @T("Admin.Catalog.Articles.CommonInfo")
+                </div>
+                <div class="panel-body">
+                    @if (Model.Id > 0)
+                    {
+                        <div class="form-group @(Model.ArticleEditorSettingsModel.Id ? null : "advanced-setting")">
+                            <div class="col-md-3">
+                                @Html.YStoryLabelFor(model => model.Id)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryDisplayFor(model => model.Id)
+                                @Html.ValidationMessageFor(model => model.Id)
+                            </div>
+                        </div>
+                    }
+                    <div class="form-group @(Model.ArticleEditorSettingsModel.ArticleType ? null : "advanced-setting")">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.ArticleTypeId)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryDropDownListFor(model => model.ArticleTypeId, ((ArticleType)Model.ArticleTypeId).ToSelectList())
+                            @Html.ValidationMessageFor(model => model.ArticleTypeId)
+                        </div>
+                    </div>
+                    @if (Model.Id > 0 && Model.AssociatedToArticleId > 0)
+                    {
+                        <div class="form-group @(Model.ArticleEditorSettingsModel.ArticleType ? null : "advanced-setting")">
+                            <div class="col-md-3">
+                                @Html.YStoryLabelFor(model => model.AssociatedToArticleId)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.ActionLink(Model.AssociatedToArticleName, "Edit", "Article", new
+                           {
+                               id = Model.AssociatedToArticleId
+                           }, new { })
+                            </div>
+                        </div>
+                    }
+                    <div class="form-group @(Model.ArticleEditorSettingsModel.ArticleTemplate ? null : "advanced-setting")" @(Model.AvailableArticleTemplates.SelectionIsNotPossible() ? Html.Raw("style=\"display:none\"") : null) id="pnlArticleTemplateId">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.ArticleTemplateId)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryDropDownListFor(model => model.ArticleTemplateId, Model.AvailableArticleTemplates)
+                            @Html.ValidationMessageFor(model => model.ArticleTemplateId)
+                        </div>
+                    </div>
+                    <div class="form-group @(Model.ArticleEditorSettingsModel.VisibleIndividually ? null : "advanced-setting")">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.VisibleIndividually)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryEditorFor(model => model.VisibleIndividually)
+                            @Html.ValidationMessageFor(model => model.VisibleIndividually)
+                        </div>
+                    </div>
+
+                    @(Html.LocalizedEditor<ArticleModel, ArticleLocalizedModel>("article-info-localized",
+                    @<div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.YStoryLabelFor(model => model.Locales[item].Name)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.Locales[item].Name)
+                                @Html.ValidationMessageFor(model => model.Locales[item].Name)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.YStoryLabelFor(model => model.Locales[item].ShortDescription)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryTextAreaFor(model => model.Locales[item].ShortDescription)
+                                @Html.ValidationMessageFor(model => model.Locales[item].ShortDescription)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.YStoryLabelFor(model => model.Locales[item].FullDescription)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.EditorFor(model => model.Locales[item].FullDescription, "RichEditor")
+                                @Html.ValidationMessageFor(model => model.Locales[item].FullDescription)
+                            </div>
+                        </div>
+                        @Html.HiddenFor(model => model.Locales[item].LanguageId)
+                    </div>
+                            ,@<div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.YStoryLabelFor(model => model.Name)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.Name, required: true)
+                                @Html.ValidationMessageFor(model => model.Name)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.YStoryLabelFor(model => model.ShortDescription)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryTextAreaFor(x => x.ShortDescription)
+                                @Html.ValidationMessageFor(model => model.ShortDescription)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.YStoryLabelFor(model => model.FullDescription)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.EditorFor(x => x.FullDescription, "RichEditor")
+                                @Html.ValidationMessageFor(model => model.FullDescription)
+                            </div>
+                        </div>
+                    </div>
+                            ))
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.Sku)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryEditorFor(model => model.Sku)
+                            @Html.ValidationMessageFor(model => model.Sku)
+                        </div>
+                    </div>
+                    <div class="form-group @(Model.ArticleEditorSettingsModel.Published ? null : "advanced-setting")">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.Published)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryEditorFor(model => model.Published)
+                            @Html.ValidationMessageFor(model => model.Published)
+                        </div>
+                    </div>
+                    <div class="form-group @(Model.ArticleEditorSettingsModel.ArticleTags ? null : "advanced-setting")">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.ArticleTags)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryEditorFor(model => model.ArticleTags)
+                            @Html.ValidationMessageFor(model => model.ArticleTags)
+                        </div>
+                    </div>
+                    <div class="form-group @(Model.ArticleEditorSettingsModel.GTIN ? null : "advanced-setting")">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.Gtin)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryEditorFor(model => model.Gtin)
+                            @Html.ValidationMessageFor(model => model.Gtin)
+                        </div>
+                    </div>
+                    <div class="form-group @(Model.ArticleEditorSettingsModel.PublisherPartNumber ? null : "advanced-setting")">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.PublisherPartNumber)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryEditorFor(model => model.PublisherPartNumber)
+                            @Html.ValidationMessageFor(model => model.PublisherPartNumber)
+                        </div>
+                    </div>
+                    <div class="form-group @(Model.ArticleEditorSettingsModel.ShowOnHomePage ? null : "advanced-setting")" @(Model.IsLoggedInAsContributor ? Html.Raw("style='display: none;'") : null)>
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.ShowOnHomePage)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryEditorFor(model => model.ShowOnHomePage)
+                            @Html.ValidationMessageFor(model => model.ShowOnHomePage)
+                        </div>
+                    </div>
+                    <div class="form-group @(Model.ArticleEditorSettingsModel.DisplaySubscription ? null : "advanced-setting")" id="pnlDisplaySubscription" @(Model.IsLoggedInAsContributor ? Html.Raw("style='display: none;'") : null)>
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.DisplaySubscription)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryEditorFor(model => model.DisplaySubscription)
+                            @Html.ValidationMessageFor(model => model.DisplaySubscription)
+                        </div>
+                    </div>
+                    <div class="form-group @(Model.ArticleEditorSettingsModel.AllowCustomerReviews ? null : "advanced-setting")">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.AllowCustomerReviews)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryEditorFor(model => model.AllowCustomerReviews)
+                            @Html.ValidationMessageFor(model => model.AllowCustomerReviews)
+                        </div>
+                    </div>
+                    <div class="form-group @(Model.ArticleEditorSettingsModel.AvailableStartDate ? null : "advanced-setting")">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.AvailableStartDateTimeUtc)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryEditorFor(model => model.AvailableStartDateTimeUtc)
+                            @Html.ValidationMessageFor(model => model.AvailableStartDateTimeUtc)
+                        </div>
+                    </div>
+                    <div class="form-group @(Model.ArticleEditorSettingsModel.AvailableEndDate ? null : "advanced-setting")">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.AvailableEndDateTimeUtc)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryEditorFor(model => model.AvailableEndDateTimeUtc)
+                            @Html.ValidationMessageFor(model => model.AvailableEndDateTimeUtc)
+                        </div>
+                    </div>
+                    <div class="form-group @(Model.ArticleEditorSettingsModel.MarkAsNew ? null : "advanced-setting")">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.MarkAsNew)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryEditorFor(model => model.MarkAsNew)
+                            @Html.ValidationMessageFor(model => model.MarkAsNew)
+                        </div>
+                    </div>
+                    <div class="form-group @(Model.ArticleEditorSettingsModel.MarkAsNewStartDate ? null : "advanced-setting")" id="pnlMarkAsNewStartDateTimeUtc">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.MarkAsNewStartDateTimeUtc)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryEditorFor(model => model.MarkAsNewStartDateTimeUtc)
+                            @Html.ValidationMessageFor(model => model.MarkAsNewStartDateTimeUtc)
+                        </div>
+                    </div>
+                    <div class="form-group @(Model.ArticleEditorSettingsModel.MarkAsNewEndDate ? null : "advanced-setting")" id="pnlMarkAsNewEndDateTimeUtc">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.MarkAsNewEndDateTimeUtc)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryEditorFor(model => model.MarkAsNewEndDateTimeUtc)
+                            @Html.ValidationMessageFor(model => model.MarkAsNewEndDateTimeUtc)
+                        </div>
+                    </div>
+                    <div class="form-group @(Model.ArticleEditorSettingsModel.AdminComment ? null : "advanced-setting")">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.AdminComment)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryTextAreaFor(model => model.AdminComment)
+                            @Html.ValidationMessageFor(model => model.AdminComment)
+                        </div>
+                    </div>
+                    @if (Model.CreatedOn.HasValue)
+                    {
+                        <div class="form-group @(Model.ArticleEditorSettingsModel.CreatedOn ? null : "advanced-setting")">
+                            <div class="col-md-3">
+                                @Html.YStoryLabelFor(model => model.CreatedOn)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryDisplay(Model.CreatedOn.Value.ToString("F"))
+                            </div>
+                        </div>
+                    }
+                    @if (Model.UpdatedOn.HasValue)
+                    {
+                        <div class="form-group @(Model.ArticleEditorSettingsModel.UpdatedOn ? null : "advanced-setting")">
+                            <div class="col-md-3">
+                                @Html.YStoryLabelFor(model => model.UpdatedOn)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryDisplay(Model.UpdatedOn.Value.ToString("F"))
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+             
+        </div>
+    </div>
+    <div class="@(Model.ArticleEditorSettingsModel.OneColumnArticlePage ? "col-md-12" : "col-md-5")">
+        <div class="panel-group">
+            @{
+                var leftColumnClass = Model.ArticleEditorSettingsModel.OneColumnArticlePage ? "col-md-3" : "col-md-4";
+                var rightColumnClass = Model.ArticleEditorSettingsModel.OneColumnArticlePage ? "col-md-9" : "col-md-8";
+            }
+
+            <div class="panel panel-default margin-bottom" id="group-associated-articles">
+                <div class="panel-heading">
+                    @T("Admin.Catalog.Articles.AssociatedArticles")
+                </div>
+                @if (Model.Id > 0)
+                {
+                    <div class="panel-body">
+                        <ul class="common-list">
+                            <li>
+                                @T("Admin.Catalog.Articles.AssociatedArticles.Note1")
+                            </li>
+                            <li>
+                                @T("Admin.Catalog.Articles.AssociatedArticles.Note2")
+                            </li>
+                        </ul>
+
+                        <div id="associatedarticles-grid"></div>
+                        <script>
+                            $(document).ready(function() {
+                                $("#associatedarticles-grid").kendoGrid({
+                                    dataSource: {
+                                        type: "json",
+                                        transport: {
+                                            read: {
+                                                url: "@Html.Raw(Url.Action("AssociatedArticleList", "Article", new {articleId = Model.Id}))",
+                                                type: "POST",
+                                                dataType: "json",
+                                                data: addAntiForgeryToken
+                                            },
+                                            update: {
+                                                url: "@Html.Raw(Url.Action("AssociatedArticleUpdate", "Article"))",
+                                                type: "POST",
+                                                dataType: "json",
+                                                data: addAntiForgeryToken
+                                            },
+                                            destroy: {
+                                                url: "@Html.Raw(Url.Action("AssociatedArticleDelete", "Article"))",
+                                                type: "POST",
+                                                dataType: "json",
+                                                data: addAntiForgeryToken
+                                            }
+                                        },
+                                        schema: {
+                                            data: "Data",
+                                            total: "Total",
+                                            errors: "Errors",
+                                            model: {
+                                                id: "Id",
+                                                fields: {
+                                                    ArticleName: { editable: false, type: "string" },
+                                                    DisplaySubscription: { editable: true, type: "number" },
+                                                    Id: { editable: false, type: "number" }
+                                                }
+                                            }
+                                        },
+                                        requestEnd: function(e) {
+                                            if (e.type == "update") {
+                                                this.read();
+                                            }
+                                        },
+                                        error: function(e) {
+                                            display_kendoui_grid_error(e);
+                                            // Cancel the changes
+                                            this.cancelChanges();
+                                        },
+                                        serverPaging: true,
+                                        serverFiltering: true,
+                                        serverSorting: true
+                                    },
+                                    pageable: {
+                                        refresh: true,
+                                        numeric: false,
+                                        previousNext: false,
+                                        info: false,
+                                        @Html.Partial("_GridPagerMessages")
+                                    },
+                                    editable: {
+                                        confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                                        mode: "inline"
+                                    },
+                                    scrollable: false,
+                                    columns: [
+                                        {
+                                            field: "ArticleName",
+                                            title: "@T("Admin.Catalog.Articles.AssociatedArticles.Fields.Article")",
+                                            template: '<a href="@Url.Content("~/Admin/Article/Edit/")#=Id#">#=ArticleName#</a>',
+                                            width: 250
+                                        }, {
+                                            field: "DisplaySubscription",
+                                            title: "@T("Admin.Catalog.Articles.AssociatedArticles.Fields.DisplaySubscription")",
+                                            //integer format
+                                            format: "{0:0}",
+                                            width: 120
+                                        }, {
+                                            command: [
+                                                {
+                                                    name: "edit",
+                                                    text: {
+                                                        edit: "@T("Admin.Common.Edit")",
+                                                        update: "@T("Admin.Common.Update")",
+                                                        cancel: "@T("Admin.Common.Cancel")"
+                                                    }
+                                                }, {
+                                                    name: "destroy",
+                                                    text: "@T("Admin.Common.Delete")"
+                                                }
+                                            ],
+                                            width: 220
+                                        }
+                                    ]
+                                });
+                            });
+                        </script>
+                    </div>
+                    <div class="panel-footer">
+                        <button type="submit" id="btnAddNewAssociatedArticle" onclick="javascript:OpenWindow('@(Url.Action("AssociatedArticleAddPopup", "Article", new {articleId = Model.Id, btnId = "btnRefreshAssociatedArticles", formId = "article-form"}))', 800, 800, true); return false;" class="btn btn-primary">
+                            @T("Admin.Catalog.Articles.AssociatedArticles.AddNew")
+                        </button>
+                        <input type="submit" id="btnRefreshAssociatedArticles" style="display: none" />
+                        <script type="text/javascript">
+                            $(document).ready(function() {
+                                $('#btnRefreshAssociatedArticles').click(function() {
+                                    //refresh grid
+                                    var grid = $("#associatedarticles-grid").data('kendoGrid');
+                                    grid.dataSource.read();
+
+                                    //return false to don't reload a page
+                                    return false;
+                                });
+                            });
+                        </script>
+                    </div>
+                }
+                else
+                {
+                    <div class="panel-body">
+                        @T("Admin.Catalog.Articles.AssociatedArticles.SaveBeforeEdit")
+                    </div>
+                }
+            </div>
+             
+             
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    @T("Admin.Catalog.Articles.Mappings")
+                </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <div class="@leftColumnClass">
+                            @Html.YStoryLabelFor(model => model.SelectedCategoryIds)
+                        </div>
+                        <div class="@rightColumnClass">
+                            @Html.EditorFor(model => model.SelectedCategoryIds, new { SelectList = Model.AvailableCategories })
+                            <script>
+                                $(document).ready(function() {
+                                    var categoryIdsInput = $('#@Html.FieldIdFor(model => model.SelectedCategoryIds)').data("kendoMultiSelect");
+                                    categoryIdsInput.setOptions({
+                                        autoClose: false
+                                    });
+
+                                    @if (Model.AvailableCategories.Count == 0)
+                            {
+                                <text>
+                                    categoryIdsInput.setOptions({
+                                        enable: false,
+                                        placeholder: '@T("Admin.Catalog.Articles.Fields.Categories.NoCategoriesAvailable")'
+                                    });
+                                    categoryIdsInput._placeholder();
+                                    categoryIdsInput._enable();
+                                    </text>
+                            }
+                                });
+                            </script>
+                        </div>
+                    </div>
+                    <div class="form-group @(Model.ArticleEditorSettingsModel.Publishers ? null : "advanced-setting")">
+                        <div class="@leftColumnClass">
+                            @Html.YStoryLabelFor(model => model.SelectedPublisherIds)
+                        </div>
+                        <div class="@rightColumnClass">
+                            @Html.EditorFor(model => model.SelectedPublisherIds, new { SelectList = Model.AvailablePublishers })
+                            <script>
+                                $(document).ready(function() {
+                                    var publishersIdsInput = $('#@Html.FieldIdFor(model => model.SelectedPublisherIds)').data("kendoMultiSelect");
+                                    publishersIdsInput.setOptions({
+                                        autoClose: false
+                                    });
+
+                                    @if (Model.AvailablePublishers.Count == 0)
+                            {
+                                <text>
+                                    publishersIdsInput.setOptions({
+                                        enable: false,
+                                        placeholder: '@T("Admin.Catalog.Articles.Fields.Publishers.NoPublishersAvailable")'
+                                    });
+                                    publishersIdsInput._placeholder();
+                                    publishersIdsInput._enable();
+                                    </text>
+                            }
+                                });
+                            </script>
+                        </div>
+                    </div>
+                    <div class="form-group @(Model.ArticleEditorSettingsModel.Stores ? null : "advanced-setting")">
+                        <div class="@leftColumnClass">
+                            @Html.YStoryLabelFor(model => model.SelectedStoreIds)
+                        </div>
+                        <div class="@rightColumnClass">
+                            @Html.EditorFor(model => model.SelectedStoreIds, new { SelectList = Model.AvailableStores })
+                            <script>
+                                $(document).ready(function() {
+                                    var storesIdsInput = $('#@Html.FieldIdFor(model => model.SelectedStoreIds)').data("kendoMultiSelect");
+                                    storesIdsInput.setOptions({
+                                        autoClose: false
+                                    });
+
+                                    @if (Model.AvailableStores.Count == 0)
+                            {
+                                <text>
+                                    storesIdsInput.setOptions({
+                                        enable: false,
+                                        placeholder: 'No stores available'
+                                    });
+                                    storesIdsInput._placeholder();
+                                    storesIdsInput._enable();
+                                    </text>
+                            }
+                                });
+                            </script>
+                        </div>
+                    </div>
+                    <div class="form-group @(Model.ArticleEditorSettingsModel.Contributor ? null : "advanced-setting")" @(Model.IsLoggedInAsContributor ? Html.Raw("style='display: none;'") : null)>
+                        <div class="@leftColumnClass">
+                            @Html.YStoryLabelFor(model => model.ContributorId)
+                        </div>
+                        <div class="@rightColumnClass">
+                            @Html.YStoryDropDownListFor(model => model.ContributorId, Model.AvailableContributors)
+                            @Html.ValidationMessageFor(model => model.ContributorId)
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default @(Model.ArticleEditorSettingsModel.ACL ? null : "advanced-setting")">
+                <div class="panel-heading">
+                    @T("Admin.Catalog.Articles.Security")
+                </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <div class="@leftColumnClass">
+                            @Html.YStoryLabelFor(model => model.SelectedCustomerRoleIds)
+                        </div>
+                        <div class="@rightColumnClass">
+                            @Html.EditorFor(model => model.SelectedCustomerRoleIds, new { SelectList = Model.AvailableCustomerRoles })
+                            <script>
+                                $(document).ready(function() {
+                                    var rolesIdsInput = $('#@Html.FieldIdFor(model => model.SelectedCustomerRoleIds)').data("kendoMultiSelect");
+                                    rolesIdsInput.setOptions({
+                                        autoClose: false
+                                    });
+
+                                    @if (Model.AvailableCustomerRoles.Count == 0)
+                            {
+                                <text>
+                                    rolesIdsInput.setOptions({
+                                        enable: false,
+                                        placeholder: 'No customer roles available'
+                                    });
+                                    rolesIdsInput._placeholder();
+                                    rolesIdsInput._enable();
+                                    </text>
+                            }
+                                });
+                            </script>
+                        </div>
+                    </div>
+                </div>
+            </div>
+             
+            <div class="panel panel-default @(Model.ArticleEditorSettingsModel.RelatedArticles ? null : "advanced-setting")">
+                <div class="panel-heading">
+                    @T("Admin.Catalog.Articles.RelatedArticles")
+                </div>
+                @if (Model.Id > 0)
+                {
+                    <div class="panel-body">
+                        <p>
+                            @T("Admin.Catalog.Articles.RelatedArticles.Hint")
+                        </p>
+                        <div id="relatedarticles-grid"></div>
+                        <script>
+                            $(document).ready(function() {
+                                $("#relatedarticles-grid").kendoGrid({
+                                    dataSource: {
+                                        type: "json",
+                                        transport: {
+                                            read: {
+                                                url: "@Html.Raw(Url.Action("RelatedArticleList", "Article", new {articleId = Model.Id}))",
+                                                type: "POST",
+                                                dataType: "json",
+                                                data: addAntiForgeryToken
+                                            },
+                                            update: {
+                                                url: "@Html.Raw(Url.Action("RelatedArticleUpdate", "Article"))",
+                                                type: "POST",
+                                                dataType: "json",
+                                                data: addAntiForgeryToken
+                                            },
+                                            destroy: {
+                                                url: "@Html.Raw(Url.Action("RelatedArticleDelete", "Article"))",
+                                                type: "POST",
+                                                dataType: "json",
+                                                data: addAntiForgeryToken
+                                            }
+                                        },
+                                        schema: {
+                                            data: "Data",
+                                            total: "Total",
+                                            errors: "Errors",
+                                            model: {
+                                                id: "Id",
+                                                fields: {
+                                                    Article2Name: { editable: false, type: "string" },
+                                                    DisplaySubscription: { editable: true, type: "number" },
+                                                    ArticleId2: { editable: false, type: "number" }
+                                                }
+                                            }
+                                        },
+                                        requestEnd: function(e) {
+                                            if (e.type == "update") {
+                                                this.read();
+                                            }
+                                        },
+                                        error: function(e) {
+                                            display_kendoui_grid_error(e);
+                                            // Cancel the changes
+                                            this.cancelChanges();
+                                        },
+                                        serverPaging: true,
+                                        serverFiltering: true,
+                                        serverSorting: true
+                                    },
+                                    pageable: {
+                                        refresh: true,
+                                        numeric: false,
+                                        previousNext: false,
+                                        info: false,
+                                        @Html.Partial("_GridPagerMessages")
+                                    },
+                                    editable: {
+                                        confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                                        mode: "inline"
+                                    },
+                                    scrollable: false,
+                                    columns: [
+                                        {
+                                            field: "Article2Name",
+                                            title: "@T("Admin.Catalog.Articles.RelatedArticles.Fields.Article")",
+                                            width: 250,
+                                            template: '<a href="@Url.Content("~/Admin/Article/Edit/")#=ArticleId2#">#=Article2Name#</a>'
+                                        }, {
+                                            field: "DisplaySubscription",
+                                            title: "@T("Admin.Catalog.Articles.RelatedArticles.Fields.DisplaySubscription")",
+                                            //integer format
+                                            format: "{0:0}",
+                                            width: 120
+                                        }, {
+                                            command: [
+                                                {
+                                                    name: "edit",
+                                                    text: {
+                                                        edit: "@T("Admin.Common.Edit")",
+                                                        update: "@T("Admin.Common.Update")",
+                                                        cancel: "@T("Admin.Common.Cancel")"
+                                                    }
+                                                }, {
+                                                    name: "destroy",
+                                                    text: "@T("Admin.Common.Delete")"
+                                                }
+                                            ],
+                                            width: 220
+                                        }
+                                    ]
+                                });
+                            });
+                        </script>
+                    </div>
+                    <div class="panel-footer">
+                        <button type="submit" id="btnAddNewRelatedArticle" class="btn btn-primary" onclick="javascript:OpenWindow('@(Url.Action("RelatedArticleAddPopup", "Article", new {articleId = Model.Id, btnId = "btnRefreshRelatedArticles", formId = "article-form"}))', 800, 800, true); return false;">
+                            @T("Admin.Catalog.Articles.RelatedArticles.AddNew")
+                        </button>
+                        <input type="submit" id="btnRefreshRelatedArticles" style="display: none" />
+                        <script type="text/javascript">
+                            $(document).ready(function() {
+                                $('#btnRefreshRelatedArticles').click(function() {
+                                    //refresh grid
+                                    var grid = $("#relatedarticles-grid").data('kendoGrid');
+                                    grid.dataSource.read();
+
+                                    //return false to don't reload a page
+                                    return false;
+                                });
+                            });
+                        </script>
+                    </div>
+                }
+                else
+                {
+                    <div class="panel-body">
+                        @T("Admin.Catalog.Articles.RelatedArticles.SaveBeforeEdit")
+                    </div>
+                }
+            </div>
+            <div class="panel panel-default @(Model.ArticleEditorSettingsModel.CrossSellsArticles ? null : "advanced-setting")">
+                <div class="panel-heading">
+                    @T("Admin.Catalog.Articles.CrossSells")
+                </div>
+                @if (Model.Id > 0)
+                {
+                    <div class="panel-body">
+                        <p>
+                            @T("Admin.Catalog.Articles.CrossSells.Hint")
+                        </p>
+                        <div id="crosssellarticles-grid"></div>
+                        <script>
+                            $(document).ready(function() {
+                                $("#crosssellarticles-grid").kendoGrid({
+                                    dataSource: {
+                                        type: "json",
+                                        transport: {
+                                            read: {
+                                                url: "@Html.Raw(Url.Action("CrossSellArticleList", "Article", new {articleId = Model.Id}))",
+                                                type: "POST",
+                                                dataType: "json",
+                                                data: addAntiForgeryToken
+                                            },
+                                            destroy: {
+                                                url: "@Html.Raw(Url.Action("CrossSellArticleDelete", "Article"))",
+                                                type: "POST",
+                                                dataType: "json",
+                                                data: addAntiForgeryToken
+                                            }
+                                        },
+                                        schema: {
+                                            data: "Data",
+                                            total: "Total",
+                                            errors: "Errors",
+                                            model: {
+                                                id: "Id",
+                                                fields: {
+                                                    Article2Name: { editable: false, type: "string" },
+                                                    ArticleId2: { editable: false, type: "number" }
+                                                }
+                                            }
+                                        },
+                                        error: function(e) {
+                                            display_kendoui_grid_error(e);
+                                            // Cancel the changes
+                                            this.cancelChanges();
+                                        },
+                                        serverPaging: true,
+                                        serverFiltering: true,
+                                        serverSorting: true
+                                    },
+                                    pageable: {
+                                        refresh: true,
+                                        numeric: false,
+                                        previousNext: false,
+                                        info: false,
+                                        @Html.Partial("_GridPagerMessages")
+                                    },
+                                    editable: {
+                                        confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                                        mode: "inline"
+                                    },
+                                    scrollable: false,
+                                    columns: [
+                                        {
+                                            field: "Article2Name",
+                                            title: "@T("Admin.Catalog.Articles.CrossSells.Fields.Article")",
+                                            template: '<a href="@Url.Content("~/Admin/Article/Edit/")#=ArticleId2#">#=Article2Name#"</a>'
+                                        }, {
+                                            command: { name: "destroy", text: "@T("Admin.Common.Delete")" },
+                                            title: "@T("Admin.Common.Delete")",
+                                            width: 200
+                                        }
+                                    ]
+                                });
+                            });
+                        </script>
+                    </div>
+                    <div class="panel-footer">
+                        <button type="submit" id="btnAddNewCrossSellArticle" onclick="javascript:OpenWindow('@(Url.Action("CrossSellArticleAddPopup", "Article", new {articleId = Model.Id, btnId = "btnRefreshCrossSellArticles", formId = "article-form"}))', 800, 800, true); return false;" class="btn btn-primary">
+                            @T("Admin.Catalog.Articles.CrossSells.AddNew")
+                        </button>
+                        <input type="submit" id="btnRefreshCrossSellArticles" style="display: none" />
+                        <script type="text/javascript">
+                            $(document).ready(function() {
+                                $('#btnRefreshCrossSellArticles').click(function() {
+                                    //refresh grid
+                                    var grid = $("#crosssellarticles-grid").data('kendoGrid');
+                                    grid.dataSource.read();
+
+                                    //return false to don't reload a page
+                                    return false;
+                                });
+                            });
+                        </script>
+                    </div>
+                }
+                else
+                {
+                    <div class="panel-body">
+                        @T("Admin.Catalog.Articles.CrossSells.SaveBeforeEdit")
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

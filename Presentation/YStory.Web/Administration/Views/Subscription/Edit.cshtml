@@ -1,0 +1,123 @@
+﻿@model SubscriptionModel
+
+@{
+    //page title
+    ViewBag.Title = T("Admin.Subscriptions.EditSubscriptionDetails").Text;
+    //active menu item (system name)
+    Html.SetActiveMenuItemSystemName("Subscriptions");
+}
+
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "subscription-form" }))
+{
+    @Html.AntiForgeryToken()
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            @T("Admin.Subscriptions.EditSubscriptionDetails") - @Model.CustomSubscriptionNumber
+            <small><i class="fa fa-arrow-circle-left"></i>@Html.ActionLink(T("Admin.Subscriptions.BackToList").Text, "List")</small>
+        </h1>
+        <div class="pull-right">
+            <a href="@Url.Action("PdfInvoice", new {subscriptionId = Model.Id})" class="btn bg-purple">
+                <i class="fa fa-file-pdf-o"></i>
+                @T("Admin.Subscriptions.PdfInvoice")
+            </a>
+            @if (!Model.IsLoggedInAsContributor)
+            {
+                <span id="subscription-delete" class="btn bg-red">
+                    <i class="fa fa-trash-o"></i>
+                    @T("Admin.Common.Delete")
+                </span>
+            }
+            <input type="submit" id="btnRefreshPage" style="display: none" />
+            <script type="text/javascript">
+                $(document).ready(function () {
+                    $('#btnRefreshPage').click(function () {
+                        //refresh page
+                        location.reload();
+                    });
+                });
+            </script>
+        </div>
+    </div>
+
+    @Html.ValidationSummary(false)
+
+    <script>
+        $(document).ready(function () {
+            bindBootstrapTabSelectEvent('subscription-edit');
+        });
+    </script>
+
+    <div class="content">
+        @if (Model.Warnings.Count > 0)
+        {
+            <div class="callout callout-danger">
+                <ul>
+                    @foreach (var warning in Model.Warnings)
+                    {
+                        <li>@warning</li>
+                    }
+                </ul>
+            </div>
+        }
+        <div class="form-horizontal">
+            <div id="subscription-edit" class="nav-tabs-custom">
+                <ul class="nav nav-tabs">
+                    @Html.RenderBootstrapTabHeader("tab-info", @T("Admin.Subscriptions.Info"), true)
+                    @Html.RenderBootstrapTabHeader("tab-billing-info", @T("Admin.Subscriptions.BillingInfo"))
+                    @Html.RenderBootstrapTabHeader("tab-shipping-info", @T("Admin.Subscriptions.ShippingInfo"))
+                    @Html.RenderBootstrapTabHeader("tab-articles", @T("Admin.Subscriptions.Articles"))
+                    @if (!Model.IsLoggedInAsContributor)
+                    {
+                        @Html.RenderBootstrapTabHeader("tab-subscription-notes", @T("Admin.Subscriptions.SubscriptionNotes"))
+                    }
+                </ul>
+                <div class="tab-content">
+                    @Html.RenderBootstrapTabContent("tab-info", @TabInfo(), true)
+                    @Html.RenderBootstrapTabContent("tab-billing-info", @TabBillingInfo())
+                    @Html.RenderBootstrapTabContent("tab-shipping-info", @TabShippingInfo())
+                    @Html.RenderBootstrapTabContent("tab-articles", @TabArticles())
+                    @if (!Model.IsLoggedInAsContributor)
+                    {
+                        @Html.RenderBootstrapTabContent("tab-subscription-notes", @TaborderNotes())
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {
+        //custom tabs
+        var eventMessage = new AdminTabStripCreated(this.Html, "subscription-edit");
+        EngineContext.Current.Resolve<IEventPublisher>
+            ().Publish(eventMessage);
+        foreach (var eventBlock in eventMessage.BlocksToRender)
+        {
+            @eventBlock
+        }
+    }
+
+    @*save selected tab name*@
+    <input type="hidden" id="selected-tab-name" name="selected-tab-name" value="@(Html.GetSelectedTabName())">
+}
+@Html.DeleteConfirmation("subscription-delete")
+
+@helper TabInfo()
+{
+    @Html.Partial("_SubscriptionDetails.Info", Model)
+}
+@helper TabBillingInfo()
+{
+    @Html.Partial("_SubscriptionDetails.Billing", Model)
+}
+@helper TabShippingInfo()
+{
+    @Html.Partial("_SubscriptionDetails.Shipping", Model)
+}
+@helper TabArticles()
+{
+    @Html.Partial("_SubscriptionDetails.Articles", Model)
+}
+@helper TaborderNotes()
+{
+    @Html.Partial("_SubscriptionDetails.Notes", Model)
+}

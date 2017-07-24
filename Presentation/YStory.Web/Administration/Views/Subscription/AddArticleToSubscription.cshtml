@@ -1,0 +1,185 @@
+﻿@model SubscriptionModel.AddSubscriptionArticleModel
+
+@{
+    var defaultGridPageSize = EngineContext.Current.Resolve<YStory.Core.Domain.Common.AdminAreaSettings>().DefaultGridPageSize;
+    var gridPageSizes = EngineContext.Current.Resolve<YStory.Core.Domain.Common.AdminAreaSettings>().GridPageSizes;
+
+    //page title
+    ViewBag.Title = string.Format(T("Admin.Subscriptions.Articles.AddNew.Title1").Text, Model.SubscriptionId);
+    //active menu item (system name)
+    Html.SetActiveMenuItemSystemName("Subscriptions");
+}
+
+@Html.AntiForgeryToken()
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        @string.Format(T("Admin.Subscriptions.Articles.AddNew.Title1").Text, Model.SubscriptionId)
+        <small><i class="fa fa-arrow-circle-left"></i>@Html.ActionLink(T("Admin.Subscriptions.Articles.AddNew.BackToSubscription").Text, "Edit", new { id = Model.SubscriptionId })</small>
+    </h1>
+    <div class="pull-right">
+        &nbsp;
+    </div>
+</div>
+
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel-group">
+            <div class="panel panel-default panel-search">
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <div class="col-md-4">
+                                    @Html.YStoryLabelFor(model => model.SearchArticleName)
+                                </div>
+                                <div class="col-md-8">
+                                    @Html.YStoryEditorFor(model => model.SearchArticleName)
+                                </div>
+                            </div>
+                            <div class="form-group" @(Model.AvailableCategories.SelectionIsNotPossible() ? Html.Raw("style=\"display:none\"") : null)>
+                                <div class="col-md-4">
+                                    @Html.YStoryLabelFor(model => model.SearchCategoryId)
+                                </div>
+                                <div class="col-md-8">
+                                    @Html.YStoryDropDownList("SearchCategoryId", Model.AvailableCategories)
+                                </div>
+                            </div>
+                            <div class="form-group" @(Model.AvailablePublishers.SelectionIsNotPossible() ? Html.Raw("style=\"display:none\"") : null)>
+                                <div class="col-md-4">
+                                    @Html.YStoryLabelFor(model => model.SearchPublisherId)
+                                </div>
+                                <div class="col-md-8">
+                                    @Html.YStoryDropDownList("SearchPublisherId", Model.AvailablePublishers)
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-4">
+                                    @Html.YStoryLabelFor(model => model.SearchArticleTypeId)
+                                </div>
+                                <div class="col-md-8">
+                                    @Html.YStoryDropDownList("SearchArticleTypeId", Model.AvailableArticleTypes)
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-8 col-md-offset-4">
+                                    <button type="button" id="search-articles" class="btn btn-primary btn-search">
+                                        <i class="fa fa-search"></i>
+                                        @T("Admin.Common.Search")
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div id="articles-grid"></div>
+
+                    <script>
+                        $(document).ready(function() {
+                            $("#articles-grid").kendoGrid({
+                                dataSource: {
+                                    type: "json",
+                                    transport: {
+                                        read: {
+                                            url: "@Html.Raw(Url.Action("AddArticleToSubscription", "Subscription"))",
+                                            type: "POST",
+                                            dataType: "json",
+                                            data: additionalData
+                                        }
+                                    },
+                                    schema: {
+                                        data: "Data",
+                                        total: "Total",
+                                        errors: "Errors"
+                                    },
+                                    error: function(e) {
+                                        display_kendoui_grid_error(e);
+                                        // Cancel the changes
+                                        this.cancelChanges();
+                                    },
+                                    pageSize: @(defaultGridPageSize),
+                                    serverPaging: true,
+                                    serverFiltering: true,
+                                    serverSorting: true
+                                },
+                                pageable: {
+                                    refresh: true,
+                                    pageSizes: [@(gridPageSizes)],
+                                    @Html.Partial("_GridPagerMessages")
+                                },
+                                editable: {
+                                    confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                                    mode: "inline"
+                                },
+                                scrollable: false,
+                                //selectable
+                                selectable: true,
+                                columns: [
+                                {
+                                    field: "Name",
+                                    title: "@T("Admin.Common.Select")",
+                                    width: 50,
+                                    template: '<button type="button" onclick="addArticleToSubscription(#=Id#)" class="btn btn-default">@T("Admin.Common.Select")</button>'
+                                },{
+                                    field: "Id",
+                                    title: "ID",
+                                    width: 50
+                                }, {
+                                    field: "Name",
+                                    title: "@T("Admin.Subscriptions.Articles.AddNew.Name")",
+                                    width: 400
+                                }, {
+                                    field: "Sku",
+                                    title: "@T("Admin.Subscriptions.Articles.AddNew.SKU")",
+                                    width: 100
+                                }
+                                ]
+                            });
+                        });
+                    </script>
+                    <script type="text/javascript">
+                        $(document).ready(function() {
+                            $('#search-articles').click(function() {
+                                var grid = $('#articles-grid').data('kendoGrid');
+                                grid.dataSource.page(1); //new search. Set page size to 1
+                                //grid.dataSource.read(); we already loaded the grid above using "page" function
+                                return false;
+                            });
+                        });
+
+                        $("#@Html.FieldIdFor(model => model.SearchArticleName)").keydown(function(event) {
+                            if (event.keyCode == 13) {
+                                $("#search-articles").click();
+                                return false;
+                            }
+                        });
+
+                        function additionalData() {
+                            var data = {
+                                SearchArticleName: $('#@Html.FieldIdFor(model => model.SearchArticleName)').val(),
+                                SearchCategoryId: $('#SearchCategoryId').val(),
+                                SearchPublisherId: $('#SearchPublisherId').val(),
+                                SearchArticleTypeId: $('#SearchArticleTypeId').val()
+                            };
+                            addAntiForgeryToken(data);
+                            return data;
+                        }
+
+                        function addArticleToSubscription(articleId) {
+                            //load "article details page" block
+                            var articleDetailsActionUrl = '@Html.Raw(Url.Action("AddArticleToSubscriptionDetails", "Subscription", new {subscriptionId = Model.SubscriptionId, articleId = "articleidplaceholder"}))';
+                            articleDetailsActionUrl = articleDetailsActionUrl.replace("articleidplaceholder", articleId);
+                            setLocation(articleDetailsActionUrl);
+                        }
+                    </script>
+                </div>
+            </div>
+            <div id="articledetails">
+            </div>
+            @Html.HiddenFor(model => model.SubscriptionId)
+        </div>
+    </div>
+</div>

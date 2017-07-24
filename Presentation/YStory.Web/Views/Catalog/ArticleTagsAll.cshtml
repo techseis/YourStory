@@ -1,0 +1,29 @@
+﻿@model PopularArticleTagsModel
+@{
+    Layout = "~/Views/Shared/_ColumnsTwo.cshtml";
+
+    //title
+    Html.AddTitleParts(T("PageTitle.AllArticleTags").Text);
+    //page class
+    Html.AppendPageCssClassParts("html-article-tags-all-page");
+}
+@using YStory.Web.Models.Catalog;
+<div class="page article-tags-all-page">
+    <div class="page-title">
+        <h1>@T("Articles.Tags.All")</h1>
+    </div>
+    <div class="page-body">
+        @if (Model.Tags.Count > 0)
+        {
+            <ul class="article-tags-list">
+                @foreach (var item in Model.Tags)
+                {
+                    <li>
+                        <a href="@Url.RouteUrl("ArticlesByTag", new { articleTagId = item.Id, SeName = item.SeName })" class="articletag" style="font-size:@(Model.GetFontSize(item))%;">
+                        @item.Name</a>
+                    </li>
+                }
+            </ul>
+        }
+    </div>
+</div>

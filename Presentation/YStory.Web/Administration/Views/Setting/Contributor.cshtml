@@ -1,0 +1,154 @@
+﻿@model ContributorSettingsModel
+
+@{
+    //page title
+    ViewBag.Title = T("Admin.Configuration.Settings.Contributor").Text;
+    //active menu item (system name)
+    Html.SetActiveMenuItemSystemName("Contributor settings");
+}
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            @T("Admin.Configuration.Settings.Contributor")
+        </h1>
+        <div class="pull-right">
+            <button type="submit" name="save" class="btn bg-blue">
+                <i class="fa fa-floppy-o"></i>
+                @T("Admin.Common.Save")
+            </button>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="form-horizontal">
+            @Html.Action("StoreScopeConfiguration", "Setting")
+            @Html.Action("Mode", "Setting")
+            @Html.ValidationSummary(false)
+
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        @T("Admin.Configuration.Settings.Contributor.BlockTitle.Common")
+                    </div>
+                    <div class="panel-body">
+                        <script type="text/javascript">
+                            $(document).ready(function () {
+                                $("#@Html.FieldIdFor(model => model.AllowContributorsToEditInfo)").click(toggleAllowContributorsToEditInfo);
+
+                                toggleAllowContributorsToEditInfo();
+                            });
+
+                            function toggleAllowContributorsToEditInfo() {
+                                if ($('#@Html.FieldIdFor(model => model.AllowContributorsToEditInfo)').is(':checked')) {
+                                    $('#pnlNotifyStoreOwnerAboutContributorInformationChange').show();
+                                } else {
+                                    $('#pnlNotifyStoreOwnerAboutContributorInformationChange').hide();
+                                }
+                            }
+                        </script>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.AllowCustomersToApplyForContributorAccount_OverrideForStore, model => model.AllowCustomersToApplyForContributorAccount, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.AllowCustomersToApplyForContributorAccount)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.AllowCustomersToApplyForContributorAccount)
+                                @Html.ValidationMessageFor(model => model.AllowCustomersToApplyForContributorAccount)
+                            </div>
+                        </div>
+                        <div class="form-group advanced-setting">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.AllowContributorsToEditInfo_OverrideForStore, model => model.AllowContributorsToEditInfo, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.AllowContributorsToEditInfo)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.AllowContributorsToEditInfo)
+                                @Html.ValidationMessageFor(model => model.AllowContributorsToEditInfo)
+                            </div>
+                        </div>
+                        <div class="form-group advanced-setting" id="pnlNotifyStoreOwnerAboutContributorInformationChange">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.NotifyStoreOwnerAboutContributorInformationChange_OverrideForStore, model => model.NotifyStoreOwnerAboutContributorInformationChange, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.NotifyStoreOwnerAboutContributorInformationChange)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.NotifyStoreOwnerAboutContributorInformationChange)
+                                @Html.ValidationMessageFor(model => model.NotifyStoreOwnerAboutContributorInformationChange)
+                            </div>
+                        </div>
+                        <div class="form-group advanced-setting">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.MaximumArticleNumber_OverrideForStore, model => model.MaximumArticleNumber, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.MaximumArticleNumber)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.MaximumArticleNumber)
+                                @Html.ValidationMessageFor(model => model.MaximumArticleNumber)
+                            </div>
+                        </div>
+                        <div class="form-group advanced-setting">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.AllowContributorsToImportArticles_OverrideForStore, model => model.AllowContributorsToImportArticles, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.AllowContributorsToImportArticles)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.AllowContributorsToImportArticles)
+                                @Html.ValidationMessageFor(model => model.AllowContributorsToImportArticles)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        @T("Admin.Configuration.Settings.Contributor.BlockTitle.Catalog")
+                    </div>
+                    <div class="panel-body">
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.AllowCustomersToContactContributors_OverrideForStore, model => model.AllowCustomersToContactContributors, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.AllowCustomersToContactContributors)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.AllowCustomersToContactContributors)
+                                @Html.ValidationMessageFor(model => model.AllowCustomersToContactContributors)
+                            </div>
+                        </div>
+                        <div class="form-group advanced-setting">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.AllowSearchByContributor_OverrideForStore, model => model.AllowSearchByContributor, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.AllowSearchByContributor)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.AllowSearchByContributor)
+                                @Html.ValidationMessageFor(model => model.AllowSearchByContributor)
+                            </div>
+                        </div>
+                        <div class="form-group advanced-setting">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.ShowContributorOnArticleDetailsPage_OverrideForStore, model => model.ShowContributorOnArticleDetailsPage, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.ShowContributorOnArticleDetailsPage)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.ShowContributorOnArticleDetailsPage)
+                                @Html.ValidationMessageFor(model => model.ShowContributorOnArticleDetailsPage)
+                            </div>
+                        </div>
+                        <div class="form-group advanced-setting">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.ContributorsBlockItemsToDisplay_OverrideForStore, model => model.ContributorsBlockItemsToDisplay, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.ContributorsBlockItemsToDisplay)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.ContributorsBlockItemsToDisplay)
+                                @Html.ValidationMessageFor(model => model.ContributorsBlockItemsToDisplay)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}

@@ -1,0 +1,165 @@
+﻿@model CustomerSubscriptionListModel
+@{
+    Layout = "~/Views/Shared/_ColumnsTwo.cshtml";
+
+    //title
+    Html.AddTitleParts(T("PageTitle.Account").Text);
+    //page class
+    Html.AppendPageCssClassParts("html-account-page");
+    Html.AppendPageCssClassParts("html-subscription-list-page");
+}
+@using YStory.Web.Models.Customer
+@using YStory.Web.Models.Subscription;
+@section left
+{
+    @Html.Action("CustomerNavigation", "Customer", new { selectedTabId = CustomerNavigationEnum.Subscriptions })
+}
+<div class="page account-page subscription-list-page">
+    <div class="page-title">
+        <h1>@T("Account.MyAccount") - @T("Account.CustomerSubscriptions")</h1>
+    </div>
+    <div class="page-body">
+        @if (Model.RecurringSubscriptions.Count > 0)
+        {
+            <div class="section recurring-payments">
+                <div class="title">
+                    <strong>@T("Account.CustomerSubscriptions.RecurringSubscriptions")</strong>
+                </div>
+                @using (Html.BeginForm())
+                {
+                    var canRetryRecurringSubscriptions = Model.RecurringSubscriptions.Any(recurring => recurring.CanRetryLastPayment);
+
+                    @Html.AntiForgeryToken()
+                    <div class="table-wrapper">
+                        <table class="data-table">
+                            <colgroup>
+                                <col />
+                                <col />
+                                <col />
+                                <col />
+                                <col />
+                                <col />
+                                @if (canRetryRecurringSubscriptions) { <col /> }
+                                <col />
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th class="start-date">
+                                        @T("Account.CustomerSubscriptions.RecurringSubscriptions.StartDate")
+                                    </th>
+                                    <th class="cycle-info">
+                                        @T("Account.CustomerSubscriptions.RecurringSubscriptions.CycleInfo")
+                                    </th>
+                                    <th class="next-payment">
+                                        @T("Account.CustomerSubscriptions.RecurringSubscriptions.NextPayment")
+                                    </th>
+                                    <th class="total-cycles">
+                                        @T("Account.CustomerSubscriptions.RecurringSubscriptions.TotalCycles")
+                                    </th>
+                                    <th class="cycles-remaining">
+                                        @T("Account.CustomerSubscriptions.RecurringSubscriptions.CyclesRemaining")
+                                    </th>
+                                    <th class="initial-subscription">
+                                        @T("Account.CustomerSubscriptions.RecurringSubscriptions.InitialSubscription")
+                                    </th>
+                                    @if (canRetryRecurringSubscriptions)
+                                    {
+                                        <th class="retry">
+                                            @T("Account.CustomerSubscriptions.RecurringSubscriptions.RetryLastPayment")
+                                        </th>
+                                    }
+                                    <th class="cancel">
+                                        @T("Account.CustomerSubscriptions.RecurringSubscriptions.Cancel")
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.RecurringSubscriptions)
+                                {
+                                    <tr>
+                                        <td class="start-date">
+                                            @item.StartDate
+                                        </td>
+                                        <td class="cycle-info">
+                                            @item.CycleInfo
+                                        </td>
+                                        <td class="next-payment">
+                                            @item.NextPayment
+                                        </td>
+                                        <td class="total-cycles">
+                                            @item.TotalCycles
+                                        </td>
+                                        <td class="cycles-remaining">
+                                            @item.CyclesRemaining
+                                        </td>
+                                        <td class="initial-subscription">
+                                            <a href="@Url.RouteUrl("SubscriptionDetails", new { subscriptionId = item.InitialSubscriptionId })">@string.Format(T("Account.CustomerSubscriptions.RecurringSubscriptions.ViewInitialSubscription").Text, item.InitialSubscriptionNumber)</a>
+                                        </td>
+                                        @if (canRetryRecurringSubscriptions)
+                                        {
+                                            <td class="retry">
+                                                @if (item.CanRetryLastPayment)
+                                                {
+                                                    <input type="submit" name="retryLastPayment_@(item.Id)" value="@T("Account.CustomerSubscriptions.RecurringSubscriptions.RetryLastPayment")" class="button-2 retry-recurring-subscription-button" />
+                                                }
+                                            </td>
+                                        }
+                                        <td class="cancel">
+                                            @if (item.CanCancel)
+                                            {
+                                                <input type="submit" name="cancelRecurringPayment@(item.Id)" value="@T("Account.CustomerSubscriptions.RecurringSubscriptions.Cancel")" class="button-2 cancel-recurring-subscription-button" />
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+            if (Model.RecurringPaymentErrors.Any())
+            {
+                <div class="message-error">
+                    <ul>
+                        @foreach (var error in Model.RecurringPaymentErrors)
+                        {
+                            <li>@error</li>
+                        }
+                    </ul>
+                </div>
+            }
+        }
+        
+        @if (Model.Subscriptions.Count > 0)
+        {
+            <div class="subscription-list">
+                @foreach (var subscription in Model.Subscriptions)
+                {
+                <div class="section subscription-item">
+                    <div class="title">
+                        <strong>@T("Account.CustomerSubscriptions.SubscriptionNumber"): @subscription.CustomSubscriptionNumber</strong>
+                    </div>
+                    <ul class="info">
+                        <li>@T("Account.CustomerSubscriptions.SubscriptionStatus"): <span class="subscription-status @subscription.SubscriptionStatusEnum.ToString().ToLowerInvariant()">@subscription.SubscriptionStatus</span></li>
+                        <li>@T("Account.CustomerSubscriptions.SubscriptionDate"): <span class="subscription-date">@subscription.CreatedOn.ToString()</span></li>
+                        <li>@T("Account.CustomerSubscriptions.SubscriptionTotal"): <span class="subscription-total">@subscription.SubscriptionTotal</span></li>
+                    </ul>
+                    <div class="buttons">
+                        @if (subscription.IsReturnRequestAllowed)
+                        {
+                            <input type="button" value="@T("Account.CustomerSubscriptions.ReturnItems")" class="button-2 return-items-button" onclick="setLocation('@Url.RouteUrl("ReturnRequest", new { subscriptionId = subscription.Id })')" />
+                        }
+                        <input type="button" value="@T("Account.CustomerSubscriptions.SubscriptionDetails")" class="button-2 subscription-details-button" onclick="setLocation('@Url.RouteUrl("SubscriptionDetails", new { subscriptionId = subscription.Id })')" />
+                    </div>
+                </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="no-data">
+                @T("Account.CustomerSubscriptions.NoSubscriptions")
+            </div>
+        }
+    </div>
+</div>

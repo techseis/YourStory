@@ -1,0 +1,234 @@
+﻿@model MediaSettingsModel
+
+@{
+    //page title
+    ViewBag.Title = T("Admin.Configuration.Settings.Media").Text;
+    //active menu item (system name)
+    Html.SetActiveMenuItemSystemName("Media settings");
+}
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            @T("Admin.Configuration.Settings.Media")
+        </h1>
+        <div class="pull-right">
+            <button type="submit" name="save" class="btn bg-blue">
+                <i class="fa fa-floppy-o"></i>
+                @T("Admin.Common.Save")
+            </button>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="form-horizontal">
+            @Html.Action("StoreScopeConfiguration", "Setting")
+            @Html.Action("Mode", "Setting")
+            @Html.ValidationSummary(false)
+
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        @T("Admin.Configuration.Settings.Media.BlockTitle.Common")
+                    </div>
+                    <div class="panel-body">
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.YStoryLabelFor(model => model.PicturesStoredIntoDatabase)
+                            </div>
+                            <div class="col-md-1">
+                                <div class="form-text-row">
+                                    @if (Model.PicturesStoredIntoDatabase)
+                                    {
+                                        @T("Admin.Configuration.Settings.Media.PicturesStoredIntoDatabase.Database")
+                                    }
+                                    else
+                                    {
+                                        @T("Admin.Configuration.Settings.Media.PicturesStoredIntoDatabase.FileSystem")
+                                    }
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <button type="submit" id="change-picture-storage" name="change-picture-storage" class="btn btn-primary">
+                                    @T("Admin.Configuration.Settings.Media.PicturesStoredIntoDatabase.Change")
+                                </button>
+                                @Html.ActionConfirmation("change-picture-storage")
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-9 col-md-offset-3">
+                                <span>@T("Admin.Configuration.Settings.Media.PicturesStoredIntoDatabase.Note")</span>
+                            </div>
+                        </div>
+                        <div class="form-group advanced-setting">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.MaximumImageSize_OverrideForStore, model => model.MaximumImageSize, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.MaximumImageSize)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.MaximumImageSize)
+                                @Html.ValidationMessageFor(model => model.MaximumImageSize)
+                            </div>
+                        </div>
+                        <div class="form-group advanced-setting">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.MultipleThumbDirectories_OverrideForStore, model => model.MultipleThumbDirectories, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.MultipleThumbDirectories)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.MultipleThumbDirectories)
+                                @Html.ValidationMessageFor(model => model.MultipleThumbDirectories)
+                            </div>
+                        </div>
+                        <div class="form-group advanced-setting">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.DefaultImageQuality_OverrideForStore, model => model.DefaultImageQuality, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.DefaultImageQuality)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.DefaultImageQuality)
+                                @Html.ValidationMessageFor(model => model.DefaultImageQuality)
+                            </div>
+                        </div>
+                        <div class="form-group advanced-setting">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.ImportArticleImagesUsingHash_OverrideForStore, model => model.ImportArticleImagesUsingHash, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.ImportArticleImagesUsingHash)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.ImportArticleImagesUsingHash)
+                                @Html.ValidationMessageFor(model => model.ImportArticleImagesUsingHash)
+                            </div>
+                        </div>
+                        <div class="form-group advanced-setting">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.DefaultPictureZoomEnabled_OverrideForStore, model => model.DefaultPictureZoomEnabled, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.DefaultPictureZoomEnabled)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.DefaultPictureZoomEnabled)
+                                @Html.ValidationMessageFor(model => model.DefaultPictureZoomEnabled)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel panel-default advanced-setting">
+                    <div class="panel-heading">
+                        @T("Admin.Configuration.Settings.Media.BlockTitle.Article")
+                    </div>
+                    <div class="panel-body">
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.ArticleDetailsPictureSize_OverrideForStore, model => model.ArticleDetailsPictureSize, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.ArticleDetailsPictureSize)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.ArticleDetailsPictureSize)
+                                @Html.ValidationMessageFor(model => model.ArticleDetailsPictureSize)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.ArticleThumbPictureSize_OverrideForStore, model => model.ArticleThumbPictureSize, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.ArticleThumbPictureSize)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.ArticleThumbPictureSize)
+                                @Html.ValidationMessageFor(model => model.ArticleThumbPictureSize)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.ArticleThumbPictureSizeOnArticleDetailsPage_OverrideForStore, model => model.ArticleThumbPictureSizeOnArticleDetailsPage, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.ArticleThumbPictureSizeOnArticleDetailsPage)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.ArticleThumbPictureSizeOnArticleDetailsPage)
+                                @Html.ValidationMessageFor(model => model.ArticleThumbPictureSizeOnArticleDetailsPage)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.AssociatedArticlePictureSize_OverrideForStore, model => model.AssociatedArticlePictureSize, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.AssociatedArticlePictureSize)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.AssociatedArticlePictureSize)
+                                @Html.ValidationMessageFor(model => model.AssociatedArticlePictureSize)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel panel-default advanced-setting">
+                    <div class="panel-heading">
+                        @T("Admin.Configuration.Settings.Media.BlockTitle.OtherPages")
+                    </div>
+                    <div class="panel-body">
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.CategoryThumbPictureSize_OverrideForStore, model => model.CategoryThumbPictureSize, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.CategoryThumbPictureSize)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.CategoryThumbPictureSize)
+                                @Html.ValidationMessageFor(model => model.CategoryThumbPictureSize)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.PublisherThumbPictureSize_OverrideForStore, model => model.PublisherThumbPictureSize, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.PublisherThumbPictureSize)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.PublisherThumbPictureSize)
+                                @Html.ValidationMessageFor(model => model.PublisherThumbPictureSize)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.ContributorThumbPictureSize_OverrideForStore, model => model.ContributorThumbPictureSize, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.ContributorThumbPictureSize)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.ContributorThumbPictureSize)
+                                @Html.ValidationMessageFor(model => model.ContributorThumbPictureSize)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.CartThumbPictureSize_OverrideForStore, model => model.CartThumbPictureSize, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.CartThumbPictureSize)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.CartThumbPictureSize)
+                                @Html.ValidationMessageFor(model => model.CartThumbPictureSize)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.MiniCartThumbPictureSize_OverrideForStore, model => model.MiniCartThumbPictureSize, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.MiniCartThumbPictureSize)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.MiniCartThumbPictureSize)
+                                @Html.ValidationMessageFor(model => model.MiniCartThumbPictureSize)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.AvatarPictureSize_OverrideForStore, model => model.AvatarPictureSize, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.AvatarPictureSize)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.AvatarPictureSize)
+                                @Html.ValidationMessageFor(model => model.AvatarPictureSize)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}

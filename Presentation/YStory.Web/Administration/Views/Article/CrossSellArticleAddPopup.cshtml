@@ -1,0 +1,223 @@
+﻿@model ArticleModel.AddCrossSellArticleModel
+
+@{
+    Layout = "~/Administration/Views/Shared/_AdminPopupLayout.cshtml";
+
+    var popupGridPageSize = EngineContext.Current.Resolve<YStory.Core.Domain.Common.AdminAreaSettings>().PopupGridPageSize;
+
+    //page title
+    ViewBag.Title = T("Admin.Catalog.Articles.CrossSells.AddNew").Text;
+}
+
+@if (ViewBag.RefreshPage == true)
+{
+    <script type="text/javascript">
+        try {window.opener.document.forms['@(ViewBag.formId)'].@(ViewBag.btnId).click();}
+        catch (e){}
+        window.close();
+    </script>
+}
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            @T("Admin.Catalog.Articles.CrossSells.AddNew")
+        </h1>
+        <div class="pull-right">
+            &nbsp;
+        </div>
+    </div>
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <div class="panel panel-default panel-search panel-popup">
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <div class="col-sm-5">
+                                        @Html.YStoryLabelFor(model => model.SearchArticleName)
+                                    </div>
+                                    <div class="col-sm-7">
+                                        @Html.YStoryEditorFor(model => model.SearchArticleName)
+                                    </div>
+                                </div>
+                                <div class="form-group" @(Model.AvailableCategories.SelectionIsNotPossible() ? Html.Raw("style=\"display:none\"") : null)>
+                                    <div class="col-sm-5">
+                                        @Html.YStoryLabelFor(model => model.SearchCategoryId)
+                                    </div>
+                                    <div class="col-sm-7">
+                                        @Html.YStoryDropDownList("SearchCategoryId", Model.AvailableCategories)
+                                    </div>
+                                </div>
+                                <div class="form-group" @(Model.AvailableContributors.SelectionIsNotPossible() || Model.IsLoggedInAsContributor ? Html.Raw("style='display: none;'") : null)>
+                                    <div class="col-sm-5">
+                                        @Html.YStoryLabelFor(model => model.SearchContributorId)
+                                    </div>
+                                    <div class="col-sm-7">
+                                        @Html.YStoryDropDownList("SearchContributorId", Model.AvailableContributors)
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group" @(Model.AvailableStores.SelectionIsNotPossible() ? Html.Raw("style=\"display:none\"") : null)>
+                                    <div class="col-sm-5">
+                                        @Html.YStoryLabelFor(model => model.SearchStoreId)
+                                    </div>
+                                    <div class="col-sm-7">
+                                        @Html.YStoryDropDownList("SearchStoreId", Model.AvailableStores)
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-5">
+                                        @Html.YStoryLabelFor(model => model.SearchArticleTypeId)
+                                    </div>
+                                    <div class="col-sm-7">
+                                        @Html.YStoryDropDownList("SearchArticleTypeId", Model.AvailableArticleTypes)
+                                    </div>
+                                </div>
+                                <div class="form-group" @(Model.AvailablePublishers.SelectionIsNotPossible() ? Html.Raw("style=\"display:none\"") : null)>
+                                    <div class="col-sm-5">
+                                        @Html.YStoryLabelFor(model => model.SearchPublisherId)
+                                    </div>
+                                    <div class="col-sm-7">
+                                        @Html.YStoryDropDownList("SearchPublisherId", Model.AvailablePublishers)
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <button type="button" id="search-articles" class="btn btn-primary btn-search">
+                                    <i class="fa fa-search"></i>
+                                    @T("Admin.Common.Search")
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div id="articles-grid"></div>
+
+                        <script>
+                            $(document).ready(function () {
+                                $("#articles-grid").kendoGrid({
+                                    dataSource: {
+                                        type: "json",
+                                        transport: {
+                                            read: {
+                                                url: "@Html.Raw(Url.Action("CrossSellArticleAddPopupList", "Article"))",
+                                                type: "POST",
+                                                dataType: "json",
+                                                data: additionalData
+                                            }
+                                        },
+                                        schema: {
+                                            data: "Data",
+                                            total: "Total",
+                                            errors: "Errors"
+                                        },
+                                        error: function(e) {
+                                            display_kendoui_grid_error(e);
+                                            // Cancel the changes
+                                            this.cancelChanges();
+                                        },
+                                        pageSize: @(popupGridPageSize),
+                                        serverPaging: true,
+                                        serverFiltering: true,
+                                        serverSorting: true
+                                    },
+                                    pageable: {
+                                        refresh: true,
+                                        @Html.Partial("_GridPagerMessages")
+                                    },
+                                    editable: {
+                                        confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                                        mode: "inline"
+                                    },
+                                    scrollable: false,
+                                    columns: [{
+                                        field: "Id",
+                                        title: "@T("Admin.Common.Check")",
+                                        headerTemplate: "<input id='mastercheckbox' type='checkbox'/>",
+                                        headerAttributes: { style: "text-align:center" },
+                                        template: "<input type='checkbox' name='SelectedArticleIds' value='#=Id#' class='checkboxGroups' />",
+                                        attributes: { style: "text-align:center" },
+                                        width: 50
+                                    }, {
+                                        field: "Name",
+                                        title: "@T("Admin.Catalog.Articles.Fields.Name")"
+                                    }, {
+                                        field: "Published",
+                                        title: "@T("Admin.Catalog.Articles.Fields.Published")",
+                                        width: 100,
+                                        headerAttributes: { style: "text-align:center" },
+                                        attributes: { style: "text-align:center" },
+                                        template: '# if(Published) {# <i class="fa fa-check true-icon"></i> #} else {# <i class="fa fa-close false-icon"></i> #} #'
+                                    }]
+                                });
+                            });
+                        </script>
+                    </div>
+                    <div class="panel-footer">
+                        <button type="submit" name="save" class="btn bg-blue">
+                            <i class="fa fa-floppy-o"></i>
+                            @T("Admin.Common.Save")
+                        </button>
+                    </div>
+                </div>
+
+                <script type="text/javascript">
+                    $(document).ready(function () {
+                        $('#search-articles').click(function () {
+                            var grid = $('#articles-grid').data('kendoGrid');
+                            grid.dataSource.page(1); //new search. Set page size to 1
+                            //grid.dataSource.read(); we already loaded the grid above using "page" function
+                            //clear selected checkboxes
+                            $('.checkboxGroups').attr('checked', false).change();
+                            return false;
+                        });
+
+                        $("#@Html.FieldIdFor(model => model.SearchArticleName)").keydown(function (event) {
+                            if (event.keyCode == 13) {
+                                $("#search-articles").click();
+                                return false;
+                            }
+                        });
+
+                        //wire up checkboxes
+                        $('#mastercheckbox').click(function() {
+                            $('.checkboxGroups').attr('checked', $(this).is(':checked')).change();
+                        });
+
+                        $('#articles-grid').on('change', 'input[type=checkbox][id!=mastercheckbox][class=checkboxGroups]', function(e) {
+                            updateMasterCheckbox();
+                        });
+                    });
+
+                    function additionalData() {
+                        var data = {
+                            SearchArticleName: $('#@Html.FieldIdFor(model => model.SearchArticleName)').val(),
+                            SearchCategoryId: $('#SearchCategoryId').val(),
+                            SearchPublisherId: $('#SearchPublisherId').val(),
+                            SearchStoreId: $('#SearchStoreId').val(),
+                            SearchContributorId: $('#SearchContributorId').val(),
+                            SearchArticleTypeId: $('#SearchArticleTypeId').val()
+                        };
+                        addAntiForgeryToken(data);
+                        return data;
+                    }
+                    function updateMasterCheckbox() {
+                        var numChkBoxes = $('#articles-grid input[type=checkbox][id!=mastercheckbox][class=checkboxGroups]').length;
+                        var numChkBoxesChecked = $('#articles-grid input[type=checkbox][id!=mastercheckbox][class=checkboxGroups]:checked').length;
+                        $('#mastercheckbox').attr('checked', numChkBoxes == numChkBoxesChecked && numChkBoxes > 0);
+                    }
+                </script>
+            </div>
+        </div>
+    </div>
+}

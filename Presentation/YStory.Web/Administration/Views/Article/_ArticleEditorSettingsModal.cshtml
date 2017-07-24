@@ -1,0 +1,371 @@
+﻿@model ArticleModel
+
+<div id="articlesettings-window" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="articlesettings-window-title">
+    <div class="modal-dialog editor-settings-modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="articlesettings-window-title">
+                    @T("Admin.Configuration.Settings.ArticleEditor.ModalTitle")
+                </h4>
+            </div>
+            <div class="modal-body">
+                @using (Html.BeginForm("SaveArticleEditorSettings", "Article"))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.Hidden("returnurl", HttpContext.Current.Request.RawUrl)
+                    <div class="row">
+                        <div class="col-md-12">
+                            @T("Admin.Configuration.Settings.ArticleEditor.ModalDescription")
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="panel-group">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading clearfix">
+                                        <div class="form-group">
+                                            <div class="col-md-10">
+                                                @T("Admin.Configuration.Settings.ArticleEditor.BlockTitle.CommonInfo")
+                                            </div>
+                                            <div class="col-md-2">
+                                                <input type="checkbox" class="select-all-fields" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div class="form-group">
+                                            <div class="col-md-10">
+                                                @Html.YStoryLabelFor(model => model.ArticleEditorSettingsModel.Id)
+                                            </div>
+                                            <div class="col-md-2">
+                                                @Html.YStoryEditorFor(model => model.ArticleEditorSettingsModel.Id)
+                                                @Html.ValidationMessageFor(model => model.ArticleEditorSettingsModel.Id)
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-md-10">
+                                                @Html.YStoryLabelFor(model => model.ArticleEditorSettingsModel.ArticleType)
+                                            </div>
+                                            <div class="col-md-2">
+                                                @Html.YStoryEditorFor(model => model.ArticleEditorSettingsModel.ArticleType)
+                                                @Html.ValidationMessageFor(model => model.ArticleEditorSettingsModel.ArticleType)
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-md-10">
+                                                @Html.YStoryLabelFor(model => model.ArticleEditorSettingsModel.ArticleTemplate)
+                                            </div>
+                                            <div class="col-md-2">
+                                                @Html.YStoryEditorFor(model => model.ArticleEditorSettingsModel.ArticleTemplate)
+                                                @Html.ValidationMessageFor(model => model.ArticleEditorSettingsModel.ArticleTemplate)
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-md-10">
+                                                @Html.YStoryLabelFor(model => model.ArticleEditorSettingsModel.VisibleIndividually)
+                                            </div>
+                                            <div class="col-md-2">
+                                                @Html.YStoryEditorFor(model => model.ArticleEditorSettingsModel.VisibleIndividually)
+                                                @Html.ValidationMessageFor(model => model.ArticleEditorSettingsModel.VisibleIndividually)
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-md-10">
+                                                @Html.YStoryLabelFor(model => model.ArticleEditorSettingsModel.Published)
+                                            </div>
+                                            <div class="col-md-2">
+                                                @Html.YStoryEditorFor(model => model.ArticleEditorSettingsModel.Published)
+                                                @Html.ValidationMessageFor(model => model.ArticleEditorSettingsModel.Published)
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-md-10">
+                                                @Html.YStoryLabelFor(model => model.ArticleEditorSettingsModel.ArticleTags)
+                                            </div>
+                                            <div class="col-md-2">
+                                                @Html.YStoryEditorFor(model => model.ArticleEditorSettingsModel.ArticleTags)
+                                                @Html.ValidationMessageFor(model => model.ArticleEditorSettingsModel.ArticleTags)
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-md-10">
+                                                @Html.YStoryLabelFor(model => model.ArticleEditorSettingsModel.GTIN)
+                                            </div>
+                                            <div class="col-md-2">
+                                                @Html.YStoryEditorFor(model => model.ArticleEditorSettingsModel.GTIN)
+                                                @Html.ValidationMessageFor(model => model.ArticleEditorSettingsModel.GTIN)
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-md-10">
+                                                @Html.YStoryLabelFor(model => model.ArticleEditorSettingsModel.PublisherPartNumber)
+                                            </div>
+                                            <div class="col-md-2">
+                                                @Html.YStoryEditorFor(model => model.ArticleEditorSettingsModel.PublisherPartNumber)
+                                                @Html.ValidationMessageFor(model => model.ArticleEditorSettingsModel.PublisherPartNumber)
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-md-10">
+                                                @Html.YStoryLabelFor(model => model.ArticleEditorSettingsModel.ShowOnHomePage)
+                                            </div>
+                                            <div class="col-md-2">
+                                                @Html.YStoryEditorFor(model => model.ArticleEditorSettingsModel.ShowOnHomePage)
+                                                @Html.ValidationMessageFor(model => model.ArticleEditorSettingsModel.ShowOnHomePage)
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-md-10">
+                                                @Html.YStoryLabelFor(model => model.ArticleEditorSettingsModel.DisplaySubscription)
+                                            </div>
+                                            <div class="col-md-2">
+                                                @Html.YStoryEditorFor(model => model.ArticleEditorSettingsModel.DisplaySubscription)
+                                                @Html.ValidationMessageFor(model => model.ArticleEditorSettingsModel.DisplaySubscription)
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-md-10">
+                                                @Html.YStoryLabelFor(model => model.ArticleEditorSettingsModel.AllowCustomerReviews)
+                                            </div>
+                                            <div class="col-md-2">
+                                                @Html.YStoryEditorFor(model => model.ArticleEditorSettingsModel.AllowCustomerReviews)
+                                                @Html.ValidationMessageFor(model => model.ArticleEditorSettingsModel.AllowCustomerReviews)
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-md-10">
+                                                @Html.YStoryLabelFor(model => model.ArticleEditorSettingsModel.AvailableStartDate)
+                                            </div>
+                                            <div class="col-md-2">
+                                                @Html.YStoryEditorFor(model => model.ArticleEditorSettingsModel.AvailableStartDate)
+                                                @Html.ValidationMessageFor(model => model.ArticleEditorSettingsModel.AvailableStartDate)
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-md-10">
+                                                @Html.YStoryLabelFor(model => model.ArticleEditorSettingsModel.AvailableEndDate)
+                                            </div>
+                                            <div class="col-md-2">
+                                                @Html.YStoryEditorFor(model => model.ArticleEditorSettingsModel.AvailableEndDate)
+                                                @Html.ValidationMessageFor(model => model.ArticleEditorSettingsModel.AvailableEndDate)
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-md-10">
+                                                @Html.YStoryLabelFor(model => model.ArticleEditorSettingsModel.MarkAsNew)
+                                            </div>
+                                            <div class="col-md-2">
+                                                @Html.YStoryEditorFor(model => model.ArticleEditorSettingsModel.MarkAsNew)
+                                                @Html.ValidationMessageFor(model => model.ArticleEditorSettingsModel.MarkAsNew)
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-md-10">
+                                                @Html.YStoryLabelFor(model => model.ArticleEditorSettingsModel.MarkAsNewStartDate)
+                                            </div>
+                                            <div class="col-md-2">
+                                                @Html.YStoryEditorFor(model => model.ArticleEditorSettingsModel.MarkAsNewStartDate)
+                                                @Html.ValidationMessageFor(model => model.ArticleEditorSettingsModel.MarkAsNewStartDate)
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-md-10">
+                                                @Html.YStoryLabelFor(model => model.ArticleEditorSettingsModel.MarkAsNewEndDate)
+                                            </div>
+                                            <div class="col-md-2">
+                                                @Html.YStoryEditorFor(model => model.ArticleEditorSettingsModel.MarkAsNewEndDate)
+                                                @Html.ValidationMessageFor(model => model.ArticleEditorSettingsModel.MarkAsNewEndDate)
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-md-10">
+                                                @Html.YStoryLabelFor(model => model.ArticleEditorSettingsModel.AdminComment)
+                                            </div>
+                                            <div class="col-md-2">
+                                                @Html.YStoryEditorFor(model => model.ArticleEditorSettingsModel.AdminComment)
+                                                @Html.ValidationMessageFor(model => model.ArticleEditorSettingsModel.AdminComment)
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-md-10">
+                                                @Html.YStoryLabelFor(model => model.ArticleEditorSettingsModel.CreatedOn)
+                                            </div>
+                                            <div class="col-md-2">
+                                                @Html.YStoryEditorFor(model => model.ArticleEditorSettingsModel.CreatedOn)
+                                                @Html.ValidationMessageFor(model => model.ArticleEditorSettingsModel.CreatedOn)
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-md-10">
+                                                @Html.YStoryLabelFor(model => model.ArticleEditorSettingsModel.UpdatedOn)
+                                            </div>
+                                            <div class="col-md-2">
+                                                @Html.YStoryEditorFor(model => model.ArticleEditorSettingsModel.UpdatedOn)
+                                                @Html.ValidationMessageFor(model => model.ArticleEditorSettingsModel.UpdatedOn)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                 
+                            </div>
+                        </div>
+                      
+                        <div class="col-md-4">
+                            <div class="panel-group">
+                                <div class="panel panel-default">
+                                     
+                                     
+                                </div>
+                                <div class="panel panel-default">
+                                    <div class="panel-heading clearfix">
+                                        <div class="form-group">
+                                            <div class="col-md-10">
+                                                @T("Admin.Configuration.Settings.ArticleEditor.BlockTitle.Security")
+                                            </div>
+                                            <div class="col-md-2">
+                                                <input type="checkbox" class="select-all-fields" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div class="form-group">
+                                            <div class="col-md-10">
+                                                @Html.YStoryLabelFor(model => model.ArticleEditorSettingsModel.ACL)
+                                            </div>
+                                            <div class="col-md-2">
+                                                @Html.YStoryEditorFor(model => model.ArticleEditorSettingsModel.ACL)
+                                                @Html.ValidationMessageFor(model => model.ArticleEditorSettingsModel.ACL)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="panel panel-default">
+                                    <div class="panel-heading clearfix">
+                                        <div class="form-group">
+                                            <div class="col-md-10">
+                                                @T("Admin.Configuration.Settings.ArticleEditor.BlockTitle.LinkedArticles")
+                                            </div>
+                                            <div class="col-md-2">
+                                                <input type="checkbox" class="select-all-fields" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div class="form-group">
+                                            <div class="col-md-10">
+                                                @Html.YStoryLabelFor(model => model.ArticleEditorSettingsModel.RequireOtherArticlesAddedToTheCart)
+                                            </div>
+                                            <div class="col-md-2">
+                                                @Html.YStoryEditorFor(model => model.ArticleEditorSettingsModel.RequireOtherArticlesAddedToTheCart)
+                                                @Html.ValidationMessageFor(model => model.ArticleEditorSettingsModel.RequireOtherArticlesAddedToTheCart)
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-md-10">
+                                                @Html.YStoryLabelFor(model => model.ArticleEditorSettingsModel.RelatedArticles)
+                                            </div>
+                                            <div class="col-md-2">
+                                                @Html.YStoryEditorFor(model => model.ArticleEditorSettingsModel.RelatedArticles)
+                                                @Html.ValidationMessageFor(model => model.ArticleEditorSettingsModel.RelatedArticles)
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-md-10">
+                                                @Html.YStoryLabelFor(model => model.ArticleEditorSettingsModel.CrossSellsArticles)
+                                            </div>
+                                            <div class="col-md-2">
+                                                @Html.YStoryEditorFor(model => model.ArticleEditorSettingsModel.CrossSellsArticles)
+                                                @Html.ValidationMessageFor(model => model.ArticleEditorSettingsModel.CrossSellsArticles)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="panel panel-default">
+                                    <div class="panel-heading clearfix">
+                                        <div class="form-group">
+                                            <div class="col-md-10">
+                                                @T("Admin.Configuration.Settings.ArticleEditor.BlockTitle.Tabs")
+                                            </div>
+                                            <div class="col-md-2">
+                                                <input type="checkbox" class="select-all-fields" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div class="form-group">
+                                            <div class="col-md-10">
+                                                @Html.YStoryLabelFor(model => model.ArticleEditorSettingsModel.Seo)
+                                            </div>
+                                            <div class="col-md-2">
+                                                @Html.YStoryEditorFor(model => model.ArticleEditorSettingsModel.Seo)
+                                                @Html.ValidationMessageFor(model => model.ArticleEditorSettingsModel.Seo)
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-md-10">
+                                                @Html.YStoryLabelFor(model => model.ArticleEditorSettingsModel.PurchasedWithSubscriptions)
+                                            </div>
+                                            <div class="col-md-2">
+                                                @Html.YStoryEditorFor(model => model.ArticleEditorSettingsModel.PurchasedWithSubscriptions)
+                                                @Html.ValidationMessageFor(model => model.ArticleEditorSettingsModel.PurchasedWithSubscriptions)
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-md-10">
+                                                @Html.YStoryLabelFor(model => model.ArticleEditorSettingsModel.OneColumnArticlePage)
+                                            </div>
+                                            <div class="col-md-2">
+                                                @Html.YStoryEditorFor(model => model.ArticleEditorSettingsModel.OneColumnArticlePage)
+                                                @Html.ValidationMessageFor(model => model.ArticleEditorSettingsModel.OneColumnArticlePage)
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <div class="col-md-10">
+                                                @Html.YStoryLabelFor(model => model.ArticleEditorSettingsModel.ArticleAttributes)
+                                            </div>
+                                            <div class="col-md-2">
+                                                @Html.YStoryEditorFor(model => model.ArticleEditorSettingsModel.ArticleAttributes)
+                                                @Html.ValidationMessageFor(model => model.ArticleEditorSettingsModel.ArticleAttributes)
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-md-10">
+                                                @Html.YStoryLabelFor(model => model.ArticleEditorSettingsModel.SpecificationAttributes)
+                                            </div>
+                                            <div class="col-md-2">
+                                                @Html.YStoryEditorFor(model => model.ArticleEditorSettingsModel.SpecificationAttributes)
+                                                @Html.ValidationMessageFor(model => model.ArticleEditorSettingsModel.SpecificationAttributes)
+                                            </div>
+                                        </div>
+                                       
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 text-center margin-t-5">
+                            <button type="submit" name="save-article-editor-settings" class="btn btn-lg bg-light-blue">Save</button>
+                        </div>
+                    </div>
+                }
+                <script>
+                    $(document).ready(function () {
+                        $('input[type=checkbox].select-all-fields').each(function (index, value) {
+                            if ($('input[type=checkbox]:checked', $(this).closest('.panel')).length > 0) {
+                                $(this).attr('checked', true);
+                            }
+                        });
+
+
+                        $('input[type=checkbox].select-all-fields').on('click', function () {
+                            $('input[type=checkbox]', $(this).closest('.panel')).attr('checked', $(this).is(':checked'));
+                        });
+                    });
+                </script>
+            </div>
+        </div>
+    </div>
+</div>

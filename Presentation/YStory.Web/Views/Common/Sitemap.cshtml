@@ -1,0 +1,102 @@
+﻿@model SitemapModel
+@using YStory.Web.Models.Common;
+@{
+    Layout = "~/Views/Shared/_ColumnsOne.cshtml";
+
+    //title
+    Html.AddTitleParts(T("PageTitle.Sitemap").Text);
+    //page class
+    Html.AppendPageCssClassParts("html-sitemap-page");
+}
+<div class="page sitemap-page">
+    <div class="page-title">
+        <h1>@T("Sitemap")</h1>
+    </div>
+    <div class="page-body">
+        <div class="description">
+            @T("Sitemap.Description")
+        </div>
+        @Html.Widget("sitemap_before")
+        <div class="entity">
+            <div class="entity-title">
+                <h2>@T("Sitemap.General")</h2>
+            </div>
+            <div class="entity-body">
+                <ul>
+                    <li><a href="@Url.RouteUrl("HomePage")">@T("HomePage")</a></li>
+                    <li><a href="@Url.RouteUrl("ArticleSearch")">@T("Search")</a></li>
+                    @if (Model.NewsEnabled)
+                    {
+                        <li><a href="@Url.RouteUrl("NewsArchive")">@T("News")</a></li>
+                    }
+                    @if (Model.BlogEnabled)
+                    {
+                        <li><a href="@Url.RouteUrl("Blog")">@T("Blog")</a></li>
+                    }
+                    @if (Model.ForumEnabled)
+                    {
+                        <li><a href="@Url.RouteUrl("Boards")">@T("Forum.Forums")</a></li>
+                    }
+                    <li><a href="@Url.RouteUrl("ContactUs")">@T("ContactUs")</a></li>
+                    <li><a href="@Url.RouteUrl("CustomerInfo")">@T("Account.MyAccount")</a></li>
+                    @if (Model.Topics.Count > 0)
+                    {
+                        foreach (var item in Model.Topics)
+                        {
+                            <li><a href="@Url.RouteUrl("Topic", new {Sename = Html.GetTopicSeName(item.SystemName)})">@item.Title</a></li>
+                        }
+                    }
+                </ul>
+            </div>
+        </div>
+        @if (Model.Categories.Count > 0)
+        {
+            <div class="entity">
+                <div class="entity-title">
+                    <h2>@T("Sitemap.Categories")</h2>
+                </div>
+                <div class="entity-body">
+                    <ul>
+                        @foreach (var category in Model.Categories)
+                        { 
+                            <li><a href="@Url.RouteUrl("Category", new { SeName = category.SeName })">@category.Name</a></li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        }
+        @if (Model.Publishers.Count > 0)
+        {
+            <div class="entity">
+                <div class="entity-title">
+                    <h2>@T("Sitemap.Publishers")</h2>
+                </div>
+                <div class="entity-body">
+                    <ul>
+                        @foreach (var publisher in Model.Publishers)
+                        { 
+                            <li><a href="@Url.RouteUrl("Publisher", new { SeName = publisher.SeName })">@publisher.Name</a></li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        }
+        @if (Model.Articles.Count > 0)
+        {
+            <div class="entity">
+                <div class="entity-title">
+                    <h2>@T("Sitemap.Articles")</h2>
+                </div>
+                <div class="entity-body">
+                    <ul>
+                        @foreach (var article in Model.Articles)
+                        { 
+                            <li><a href="@Url.RouteUrl("Article", new { SeName = article.SeName })">@article.Name</a></li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        }
+        @Html.Widget("sitemap_after")
+    </div>
+</div>

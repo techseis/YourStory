@@ -1,0 +1,38 @@
+﻿@model ArticleDetailsModel
+@using YStory.Core.Domain.Catalog
+@using YStory.Web.Models.Catalog
+
+<div class="additional-details">
+    @*SKU*@
+    @if (!string.IsNullOrWhiteSpace(Model.Sku) && Model.ShowSku )
+    {
+        <div class="sku" @(string.IsNullOrWhiteSpace(Model.Sku) ? Html.Raw("style=\"display:none\"") : null)>
+            <span class="label">@T("Articles.Sku"):</span>
+            <span class="value" itemprop="sku" id="sku-@Model.Id">@Model.Sku</span>
+        </div>
+    }
+    @*Publisher part number*@
+    @if ((!string.IsNullOrWhiteSpace(Model.PublisherPartNumber) ) && Model.ShowPublisherPartNumber)
+    {
+        <div class="publisher-part-number" @(string.IsNullOrWhiteSpace(Model.PublisherPartNumber) ? Html.Raw("style=\"display:none\"") : null)>
+            <span class="label">@T("Articles.PublisherPartNumber"):</span>
+            <span class="value" id="mpn-@Model.Id">@Model.PublisherPartNumber</span>
+        </div>
+    }
+    @*GTIN*@
+    @if (!string.IsNullOrWhiteSpace(Model.Gtin) && Model.ShowGtin)
+    {
+        <div class="gtin" @(string.IsNullOrWhiteSpace(Model.Gtin) ? Html.Raw("style=\"display:none\"") : null)>
+            <span class="label">@T("Articles.GTIN"):</span>
+            <span class="value" id="gtin-@Model.Id">@Model.Gtin</span>
+        </div>
+    }
+    @*Contributor*@
+    @if (Model.ShowContributor)
+    {
+        <div class="article-contributor">
+            <span class="label">@T("Articles.Contributor"):</span>
+            <span class="value"><a href="@Url.RouteUrl("Contributor", new { SeName = Model.ContributorModel.SeName })">@Model.ContributorModel.Name</a></span>
+        </div>
+    }
+</div>

@@ -1,0 +1,274 @@
+﻿@model BulkEditListModel
+
+@{
+    var defaultGridPageSize = EngineContext.Current.Resolve<YStory.Core.Domain.Common.AdminAreaSettings>().DefaultGridPageSize;
+    var gridPageSizes = EngineContext.Current.Resolve<YStory.Core.Domain.Common.AdminAreaSettings>().GridPageSizes;
+
+    //page title
+    ViewBag.Title = T("Admin.Catalog.BulkEdit").Text;
+    //active menu item (system name)
+    Html.SetActiveMenuItemSystemName("Bulk edit articles");
+}
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            @T("Admin.Catalog.BulkEdit")
+        </h1>
+        <div class="pull-right">
+            &nbsp;
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <div class="panel panel-default panel-search">
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        @Html.YStoryLabelFor(model => model.SearchArticleName)
+                                    </div>
+                                    <div class="col-md-8">
+                                        @Html.YStoryEditorFor(model => model.SearchArticleName)
+                                    </div>
+                                </div>
+                                <div class="form-group" @(Model.AvailableCategories.SelectionIsNotPossible() ? Html.Raw("style=\"display:none\"") : null)>
+                                    <div class="col-md-4">
+                                        @Html.YStoryLabelFor(model => model.SearchCategoryId)
+                                    </div>
+                                    <div class="col-md-8">
+                                        @Html.YStoryDropDownList("SearchCategoryId", Model.AvailableCategories)
+                                    </div>
+                                </div>
+                                <div class="form-group" @(Model.AvailablePublishers.SelectionIsNotPossible() ? Html.Raw("style=\"display:none\"") : null)>
+                                    <div class="col-md-4">
+                                        @Html.YStoryLabelFor(model => model.SearchPublisherId)
+                                    </div>
+                                    <div class="col-md-8">
+                                        @Html.YStoryDropDownList("SearchPublisherId", Model.AvailablePublishers)
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        @Html.YStoryLabelFor(model => model.SearchArticleTypeId)
+                                    </div>
+                                    <div class="col-md-8">
+                                        @Html.YStoryDropDownList("SearchArticleTypeId", Model.AvailableArticleTypes)
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-8 col-md-offset-4">
+                                        <button type="button" id="search-articles" class="btn btn-primary btn-search">
+                                            <i class="fa fa-search"></i>
+                                            @T("Admin.Common.Search")
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div id="articles-grid"></div>
+
+                        <script>
+                            $(document).ready(function() {
+                                $("#articles-grid").kendoGrid({
+                                    dataSource: {
+                                        type: "json",
+                                        transport: {
+                                            read: {
+                                                url: "@Html.Raw(Url.Action("BulkEditSelect", "Article"))",
+                                                type: "POST",
+                                                dataType: "json",
+                                                data: additionalData
+                                            },
+                                            update: {
+                                                url: "@Html.Raw(Url.Action("BulkEditUpdate", "Article"))",
+                                                type: "POST",
+                                                dataType: "json"
+                                            },
+                                            destroy: {
+                                                url: "@Html.Raw(Url.Action("BulkEditDelete", "Article"))",
+                                                type: "POST",
+                                                dataType: "json"
+                                            },
+                                            parameterMap: function(data, operation) {
+                                                if (operation != "read") {
+                                                    //post the entities so the ASP.NET DefaultModelBinder will understand them:
+                                                    //articles[0].Name="name"
+                                                    //articles[0].Id = 1
+                                                    //articles[1].Name="name"
+                                                    //articles[1].Id = 1
+
+                                                    var result = {};
+
+                                                    for (var i = 0; i < data.models.length; i++) {
+                                                        var entity = data.models[i];
+
+                                                        for (var member in entity) {
+                                                            result["articles[" + i + "]." + member] = entity[member];
+                                                        }
+                                                    }
+
+                                                    addAntiForgeryToken(result);
+                                                    return result;
+                                                } else {
+                                                    addAntiForgeryToken(data);
+                                                    //return JSON.stringify(data);
+                                                    return data;
+                                                }
+                                            }
+                                        },
+                                        schema: {
+                                            data: "Data",
+                                            total: "Total",
+                                            errors: "Errors",
+                                            model: {
+                                                id: "Id",
+                                                fields: {
+                                                    Name: { editable: true, type: "string" },
+                                                    ArticleId: { editable: false, type: "number" },
+                                                    Sku: { editable: true, type: "string" },
+                                                    Price: { editable: true, type: "number" },
+                                                    OldPrice: { editable: true, type: "number" },
+                                                    ManageInventoryMethod: { editable: false, type: "string" },
+                                                    StockQuantity: { editable: true, type: "number" },
+                                                    Published: { editable: true, type: "boolean" },
+                                                    Id: { editable: false, type: "number" }
+                                                }
+                                            }
+                                        },
+                                        requestEnd: function (e) {
+                                            if (e.type == "update") {
+                                                this.read();
+                                            }
+                                        },
+                                        error: function(e) {
+                                            display_kendoui_grid_error(e);
+                                            // Cancel the changes
+                                            this.cancelChanges();
+                                        },
+                                        //bulk editing
+                                        batch: true,
+                                        pageSize: @(defaultGridPageSize),
+                                        serverPaging: true,
+                                        serverFiltering: true,
+                                        serverSorting: true
+                                    },
+                                    pageable: {
+                                        refresh: true,
+                                        pageSizes: [@(gridPageSizes)],
+                                        @Html.Partial("_GridPagerMessages")
+                                    },
+                                    toolbar: ["save", "cancel"],
+                                    editable: {
+                                        confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                                        //bulk editing
+                                        mode: "incell"
+                                    },
+                                    scrollable: false,
+                                    columns: [ {
+                                        field: "Name",
+                                        title: "@T("Admin.Catalog.BulkEdit.Fields.Name")",
+                                        width: 200
+                                    }, {
+                                        field: "ArticleId",
+                                        title: "@T("Admin.Common.View")",
+                                        width: 100,
+                                        headerAttributes: { style: "text-align:center" },
+                                        attributes: { style: "text-align:center" },
+                                        template: '<a class="btn btn-default" href="@Url.Content("~/Admin/Article/Edit/")#=Id#"><i class="fa fa-eye"></i>@T("Admin.Common.View")</a>'
+                                    },{
+                                        field: "Sku",
+                                        title: "@T("Admin.Catalog.BulkEdit.Fields.Sku")",
+                                        width: 150
+                                    }, {
+                                        field: "Price",
+                                        title: "@T("Admin.Catalog.BulkEdit.Fields.Price")",
+                                        width: 150,
+                                        editor: function (container, options) {
+                                            $('<input name="' + options.field + '"/>')
+                                                .appendTo(container)
+                                                .kendoNumericTextBox({
+                                                    format: "{0:n4}",
+                                                    decimals: 4
+                                                });
+                                        }
+                                    }, {
+                                        field: "OldPrice",
+                                        title: "@T("Admin.Catalog.BulkEdit.Fields.OldPrice")",
+                                        width: 150,
+                                        editor: function (container, options) {
+                                            $('<input name="' + options.field + '"/>')
+                                                .appendTo(container)
+                                                .kendoNumericTextBox({
+                                                    format: "{0:n4}",
+                                                    decimals: 4
+                                                });
+                                        }
+                                    }, {
+                                        field: "ManageInventoryMethod",
+                                        title: "@T("Admin.Catalog.BulkEdit.Fields.ManageInventoryMethod")",
+                                        width: 150
+                                    }, {
+                                        field: "StockQuantity",
+                                        title: "@T("Admin.Catalog.BulkEdit.Fields.StockQuantity")",
+                                        //integer format
+                                        format: "{0:0}",
+                                        width: 150
+                                    },{
+                                        field: "Published",
+                                        title: "@T("Admin.Catalog.BulkEdit.Fields.Published")",
+                                        width: 200
+                                    }, {
+                                        command: { name: "destroy", text: "@T("Admin.Common.Delete")" },
+                                        title: "@T("Admin.Common.Delete")",
+                                        width: 100
+                                    }
+                                    ]
+                                } );
+                            });
+                        </script>
+
+                        <script type="text/javascript">
+                            $(document).ready(function () {
+                                $('#search-articles').click(function () {
+                                    var grid = $('#articles-grid').data('kendoGrid');
+                                    grid.dataSource.page(1); //new search. Set page size to 1
+                                    //grid.dataSource.read(); we already loaded the grid above using "page" function
+                                    return false;
+                                });
+
+                                $("#@Html.FieldIdFor(model => model.SearchArticleName)").keydown(function (event) {
+                                    if (event.keyCode == 13) {
+                                        $("#search-articles").click();
+                                        return false;
+                                    }
+                                });
+                            });
+
+                            function additionalData() {
+                                var data = {
+                                    SearchArticleName: $('#@Html.FieldIdFor(model => model.SearchArticleName)').val(),
+                                    SearchCategoryId: $('#SearchCategoryId').val(),
+                                    SearchPublisherId: $('#SearchPublisherId').val(),
+                                    SearchArticleTypeId: $('#SearchArticleTypeId').val()
+                                };
+                                addAntiForgeryToken(data);
+                                return data;
+                            }
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}

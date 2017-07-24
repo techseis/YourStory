@@ -1,0 +1,201 @@
+﻿@model SubscriptionModel
+
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div id="subscriptionnotes-grid"></div>
+
+            <script>
+                $(document).ready(function() {
+                    $("#subscriptionnotes-grid").kendoGrid({
+                        dataSource: {
+                            type: "json",
+                            transport: {
+                                read: {
+                                    url: "@Html.Raw(Url.Action("SubscriptionNotesSelect", "Subscription", new {subscriptionId = Model.Id}))",
+                                    type: "POST",
+                                    dataType: "json",
+                                    data: addAntiForgeryToken
+                                },
+                                destroy: {
+                                    url: "@Html.Raw(Url.Action("SubscriptionNoteDelete", "Subscription", new {subscriptionId = Model.Id}))",
+                                    type: "POST",
+                                    dataType: "json",
+                                    data: addAntiForgeryToken
+                                }
+                            },
+                            schema: {
+                                data: "Data",
+                                total: "Total",
+                                errors: "Errors",
+                                model: {
+                                    id: "Id",
+                                    fields: {
+                                        //do not implicitly specify all fields
+                                        //we do it only for fields which implicitly require it
+                                        //otherwise, they'll be formatted wrong way
+                                        CreatedOn: { type: "date" }
+                                    }
+                                }
+                            },
+                            error: function(e) {
+                                display_kendoui_grid_error(e);
+                                // Cancel the changes
+                                this.cancelChanges();
+                            },
+                            serverPaging: true,
+                            serverFiltering: true,
+                            serverSorting: true
+                        },
+                        pageable: {
+                            refresh: true,
+                            numeric: false,
+                            previousNext: false,
+                            info: false,
+                            @Html.Partial("_GridPagerMessages")
+                        },
+                        editable: {
+                            confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                            mode: "inline"
+                        },
+                        scrollable: false,
+                        columns: [
+                        {
+                            field: "CreatedOn",
+                            title: "@T("Admin.Subscriptions.SubscriptionNotes.Fields.CreatedOn")",
+                            width: 200,
+                            type: "date",
+                            format: "{0:G}"
+                        }, {
+                            field: "Note",
+                            title: "@T("Admin.Subscriptions.SubscriptionNotes.Fields.Note")",
+                            encoded: false
+                        }, {
+                            field: "DownloadId",
+                            title: "@T("Admin.Subscriptions.SubscriptionNotes.Fields.Download")",
+                            width: 200,
+                            headerAttributes: { style: "text-align:center" },
+                            attributes: { style: "text-align:center" },
+                            template: '# if(DownloadId > 0) {# <a class="btn btn-default" href="@Url.Content("~/Admin/Download/DownloadFile")?downloadGuid=#=DownloadGuid#"><i class="fa fa-download"></i>@T("Admin.Subscriptions.SubscriptionNotes.Fields.Download.Link")</a> #} else {# @T("Admin.Subscriptions.SubscriptionNotes.Fields.Download.Link.No") #} #'
+                        }, {
+                            field: "DisplayToCustomer",
+                            title: "@T("Admin.Subscriptions.SubscriptionNotes.Fields.DisplayToCustomer")",
+                            width: 150,
+                            headerAttributes: { style: "text-align:center" },
+                            attributes: { style: "text-align:center" },
+                            template: '# if(DisplayToCustomer) {# <i class="fa fa-check true-icon"></i> #} else {# <i class="fa fa-close false-icon"></i> #} #'
+                        }, {
+                            command: { name: "destroy", text: "@T("Admin.Common.Delete")" },
+                            title: "@T("Admin.Common.Delete")",
+                            width: 100
+                        }
+                        ]
+                    });
+                });
+            </script>
+        </div>
+    </div>
+
+    <div class="panel panel-default">
+        <script type="text/javascript">
+            $(document).ready(function () {
+                $("#@Html.FieldIdFor(model => model.AddSubscriptionNoteHasDownload)").change(toggleAddSubscriptionNoteHasDownload);
+                toggleAddSubscriptionNoteHasDownload();
+            });
+
+            function toggleAddSubscriptionNoteHasDownload() {
+                if ($('#@Html.FieldIdFor(model => model.AddSubscriptionNoteHasDownload)').is(':checked')) {
+                    $('#pnlAddSubscriptionNoteDownloadId').show();
+                }
+                else {
+                    $('#pnlAddSubscriptionNoteDownloadId').hide();
+                }
+            }
+        </script>
+
+        <div class="panel-heading">
+            @T("Admin.Subscriptions.SubscriptionNotes.AddTitle")
+        </div>
+
+        <div class="panel-body">
+            <div class="form-group">
+                <div class="col-md-3">
+                    @Html.YStoryLabelFor(model => model.AddSubscriptionNoteMessage)
+                </div>
+                <div class="col-md-9">
+                    @Html.YStoryTextAreaFor(model => model.AddSubscriptionNoteMessage)
+                    @Html.ValidationMessageFor(model => model.AddSubscriptionNoteMessage)
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    @Html.YStoryLabelFor(model => model.AddSubscriptionNoteDownloadId)
+                </div>
+                <div class="col-md-9">
+                    <div class="checkbox">
+                        <label>
+                            @Html.YStoryEditorFor(model => model.AddSubscriptionNoteHasDownload)
+                            @T("Admin.Subscriptions.SubscriptionNotes.Fields.Download.HasDownload")
+                        </label>
+                    </div>
+                    <div id="pnlAddSubscriptionNoteDownloadId">
+                        @Html.YStoryEditorFor(model => model.AddSubscriptionNoteDownloadId)
+                        @Html.ValidationMessageFor(model => model.AddSubscriptionNoteDownloadId)
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    @Html.YStoryLabelFor(model => model.AddSubscriptionNoteDisplayToCustomer)
+                </div>
+                <div class="col-md-9">
+                    @Html.YStoryEditorFor(model => model.AddSubscriptionNoteDisplayToCustomer)
+                    @Html.ValidationMessageFor(model => model.AddSubscriptionNoteDisplayToCustomer)
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-9 col-md-offset-3">
+                    <button type="button" id="addSubscriptionNote" class="btn btn-primary">@T("Admin.Subscriptions.SubscriptionNotes.AddButton")</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#addSubscriptionNote').click(function () {
+            var subscriptionNoteMessage = $("#@Html.FieldIdFor(model => model.AddSubscriptionNoteMessage)").val();
+            var subscriptionNoteDownloadId = 0;
+            if ($('#@Html.FieldIdFor(model => model.AddSubscriptionNoteHasDownload)').is(':checked')) {
+                subscriptionNoteDownloadId = $("#@Html.FieldIdFor(model => model.AddSubscriptionNoteDownloadId)").val();
+            }
+            var subscriptionNoteDisplayToCustomer = $("#@Html.FieldIdFor(model => model.AddSubscriptionNoteDisplayToCustomer)").is(':checked');
+            $('#addSubscriptionNote').attr('disabled', true);
+
+            var postData = {
+                DisplayToCustomer: subscriptionNoteDisplayToCustomer,
+                message: subscriptionNoteMessage,
+                downloadId: subscriptionNoteDownloadId,
+                subscriptionId: @Model.Id
+                };
+            addAntiForgeryToken(postData);
+
+            $.ajax({
+                cache:false,
+                type: "POST",
+                url: "@(Url.Action("SubscriptionNoteAdd", "Subscription"))",
+                data: postData,
+                success: function (data) {
+                    var grid = $("#subscriptionnotes-grid").data('kendoGrid');
+                    grid.dataSource.read();
+                    $('#addSubscriptionNote').attr('disabled', false);
+                },
+                error:function (xhr, ajaxOptions, thrownError){
+                    alert('Failed to add subscription note.');
+                    $('#addSubscriptionNote').attr('disabled', false);
+                }
+            });
+        });
+    });
+</script>

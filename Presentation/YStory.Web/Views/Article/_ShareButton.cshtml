@@ -1,0 +1,9 @@
+﻿@model ArticleDetailsModel
+@using YStory.Web.Models.Catalog;
+
+@if (!String.IsNullOrWhiteSpace(Model.PageShareCode))
+{
+    <div class="article-share-button">
+        @Html.Raw(Model.PageShareCode)
+    </div>
+}

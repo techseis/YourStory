@@ -1,0 +1,30 @@
+﻿@model IList<ArticleOverviewModel>
+@{
+    Layout = "~/Views/Shared/_ColumnsTwo.cshtml";
+
+    //title
+    Html.AddTitleParts(T("PageTitle.RecentlyViewedArticles").Text);
+    //page class
+    Html.AppendPageCssClassParts("html-recently-viewed-articles-page");
+}
+@using YStory.Web.Models.Catalog;
+<div class="page recently-viewed-articles-page">
+    <div class="page-title">
+        <h1>@T("Articles.RecentlyViewedArticles")</h1>
+    </div>
+    <div class="page-body">
+        @if (Model.Count > 0)
+        {
+            <div class="article-grid">
+                <div class="item-grid">
+                    @foreach (var article in Model)
+                    {
+                        <div class="item-box">
+                            @Html.Partial("_ArticleBox", article)
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>

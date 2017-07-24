@@ -1,0 +1,217 @@
+﻿@model ArticleModel
+
+<div class="panel-group">
+    @if (Model.Id > 0)
+    {
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div id="articlepictures-grid"></div>
+
+                <script>
+                    $(document).ready(function() {
+                        $("#articlepictures-grid").kendoGrid({
+                            dataSource: {
+                                type: "json",
+                                transport: {
+                                    read: {
+                                        url: "@Html.Raw(Url.Action("ArticlePictureList", "Article", new {articleId = Model.Id}))",
+                                        type: "POST",
+                                        dataType: "json",
+                                        data: addAntiForgeryToken
+                                    },
+                                    update: {
+                                        url: "@Html.Raw(Url.Action("ArticlePictureUpdate", "Article"))",
+                                        type: "POST",
+                                        dataType: "json",
+                                        data: addAntiForgeryToken
+                                    },
+                                    destroy: {
+                                        url: "@Html.Raw(Url.Action("ArticlePictureDelete", "Article"))",
+                                        type: "POST",
+                                        dataType: "json",
+                                        data: addAntiForgeryToken
+                                    }
+                                },
+                                schema: {
+                                    data: "Data",
+                                    total: "Total",
+                                    errors: "Errors",
+                                    model: {
+                                        id: "Id",
+                                        fields: {
+                                            PictureUrl: { editable: false, type: "string" },
+                                            DisplaySubscription: { editable: true, type: "number" },
+                                            OverrideAltAttribute: { editable: true, type: "string" },
+                                            OverrideTitleAttribute: { editable: true, type: "string" }
+                                        }
+                                    }
+                                },
+                                requestEnd: function(e) {
+                                    if (e.type == "update") {
+                                        this.read();
+                                    }
+                                },
+                                error: function(e) {
+                                    display_kendoui_grid_error(e);
+                                    // Cancel the changes
+                                    this.cancelChanges();
+                                },
+                                serverPaging: true,
+                                serverFiltering: true,
+                                serverSorting: true
+                            },
+                            pageable: {
+                                refresh: true,
+                                numeric: false,
+                                previousNext: false,
+                                info: false,
+                                @Html.Partial("_GridPagerMessages")
+                            },
+                            editable: {
+                                confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                                mode: "inline"
+                            },
+                            scrollable: false,
+                            columns: [
+                            {
+                                field: "PictureUrl",
+                                title: "@T("Admin.Catalog.Articles.Pictures.Fields.Picture")",
+                                template: '<a href="#=PictureUrl#" target="_blank"><img alt="#=PictureId#" src="#=PictureUrl#" width="150" /></a>',
+                                width: 200
+                            }, {
+                                field: "DisplaySubscription",
+                                title: "@T("Admin.Catalog.Articles.Pictures.Fields.DisplaySubscription")",
+                                //integer format
+                                format: "{0:0}",
+                                width: 150
+                            }, {
+                                field: "OverrideAltAttribute",
+                                title: "@T("Admin.Catalog.Articles.Pictures.Fields.OverrideAltAttribute")",
+                                width: 200
+                            }, {
+                                field: "OverrideTitleAttribute",
+                                title: "@T("Admin.Catalog.Articles.Pictures.Fields.OverrideTitleAttribute")",
+                                width: 200
+                            }, {
+                                command: [
+                                {
+                                    name: "edit",
+                                    text: {
+                                        edit: "@T("Admin.Common.Edit")",
+                                        update: "@T("Admin.Common.Update")",
+                                        cancel: "@T("Admin.Common.Cancel")"
+                                    }
+                                }, {
+                                    name: "destroy",
+                                    text: "@T("Admin.Common.Delete")"
+                                }
+                                ],
+                                width: 200
+                            }
+                            ]
+                        });
+                    });
+                </script>
+            </div>
+        </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                @T("Admin.Catalog.Articles.Pictures.AddNew")
+            </div>
+            <div class="panel-body">
+                <script type="text/javascript">
+                    $(document).ready(function() {
+                        $('#addArticlePicture').click(function() {
+                            var pictureId = $("#@Html.FieldIdFor(model => model.AddPictureModel.PictureId)").val();
+                            var overrideAltAttribute = $("#@Html.FieldIdFor(model => model.AddPictureModel.OverrideAltAttribute)").val();
+                            var overrideTitleAttribute = $("#@Html.FieldIdFor(model => model.AddPictureModel.OverrideTitleAttribute)").val();
+                            var displaySubscription = $("#@Html.FieldIdFor(model => model.AddPictureModel.DisplaySubscription)").val();
+
+                            if (pictureId == 0) {
+                                alert('Upload picture first');
+                                return;
+                            }
+
+                            $('#addArticlePicture').attr('disabled', true);
+
+                            var postData = {
+                                pictureId: pictureId,
+                                displaySubscription: displaySubscription,
+                                overrideAltAttribute: overrideAltAttribute,
+                                overrideTitleAttribute: overrideTitleAttribute,
+                                articleId: @Model.Id
+                                };
+                            addAntiForgeryToken(postData);
+
+                            $.ajax({
+                                cache: false,
+                                type: "POST",
+                                url: "@(Url.Action("ArticlePictureAdd", "Article"))",
+                                data: postData,
+                                success: function(data) {
+                                    var grid = $("#articlepictures-grid");
+                                    grid.data('kendoGrid').dataSource.read();
+                                    $('#addArticlePicture').attr('disabled', false);
+                                },
+                                error: function(xhr, ajaxOptions, thrownError) {
+                                    alert('Failed to add article picture.');
+                                    $('#addArticlePicture').attr('disabled', false);
+                                }
+                            });
+                        });
+                    });
+                </script>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        @Html.YStoryLabelFor(model => model.AddPictureModel.PictureId)
+                    </div>
+                    <div class="col-md-9">
+                        @Html.YStoryEditorFor(model => model.AddPictureModel.PictureId)
+                        @Html.ValidationMessageFor(model => model.AddPictureModel.PictureId)
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        @Html.YStoryLabelFor(model => model.AddPictureModel.OverrideAltAttribute)
+                    </div>
+                    <div class="col-md-9">
+                        @Html.YStoryEditorFor(model => model.AddPictureModel.OverrideAltAttribute)
+                        @Html.ValidationMessageFor(model => model.AddPictureModel.OverrideAltAttribute)
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        @Html.YStoryLabelFor(model => model.AddPictureModel.OverrideTitleAttribute)
+                    </div>
+                    <div class="col-md-9">
+                        @Html.YStoryEditorFor(model => model.AddPictureModel.OverrideTitleAttribute)
+                        @Html.ValidationMessageFor(model => model.AddPictureModel.OverrideTitleAttribute)
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        @Html.YStoryLabelFor(model => model.AddPictureModel.DisplaySubscription)
+                    </div>
+                    <div class="col-md-9">
+                        @Html.YStoryEditorFor(model => model.AddPictureModel.DisplaySubscription)
+                        @Html.ValidationMessageFor(model => model.AddPictureModel.DisplaySubscription)
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-9 col-md-offset-3">
+                        <button type="button" id="addArticlePicture" class="btn btn-primary">@T("Admin.Catalog.Articles.Pictures.AddButton")</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="panel panel-default">
+            <div class="panel-body">
+                @T("Admin.Catalog.Articles.Pictures.SaveBeforeEdit")
+            </div>
+        </div>
+    }
+</div>

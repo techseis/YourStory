@@ -1,0 +1,143 @@
+﻿@model ArticleReviewsModel
+@using YStory.Web.Models.Catalog;
+@{
+    Layout = "~/Views/Shared/_ColumnsOne.cshtml";
+
+    //title
+    Html.AddTitleParts(Model.ArticleName);
+    Html.AddTitleParts(T("PageTitle.ArticleReviews").Text);
+    //page class
+    Html.AppendPageCssClassParts("html-article-reviews-page");
+}
+<div class="page article-reviews-page">
+    <div class="page-title">
+        <h1>@T("Reviews.ArticleReviewsFor") <a href="@Url.RouteUrl("Article", new { SeName = Model.ArticleSeName })">@Model.ArticleName</a></h1>
+    </div>
+    <div class="page-body">
+        @Html.Widget("articlereviews_page_top", Model.ArticleId)
+        @if (Model.AddArticleReview.SuccessfullyAdded)
+        {
+            <div class="result">
+                @Model.AddArticleReview.Result
+            </div>
+        }
+        else
+        {
+            <div class="write-review" id="review-form">
+                <div class="title">
+                    <strong>@T("Reviews.Write")</strong>
+                </div>
+                @using (Html.BeginForm())
+                {
+                    @Html.AntiForgeryToken()
+                    var validationSummary = Html.ValidationSummary(true);
+                    if (!MvcHtmlString.IsNullOrEmpty(validationSummary))
+                    {
+                        <div class="message-error">@validationSummary</div>
+                    }
+                    <div class="fieldset">
+                        <div class="form-fields">
+                            <div class="inputs">
+                                @Html.LabelFor(model => model.AddArticleReview.Title, new { }, ":")
+                                @Html.TextBoxFor(model => model.AddArticleReview.Title, Model.AddArticleReview.CanCurrentCustomerLeaveReview ? (object)(new { @class = "review-title" }) : (object)(new { @class = "review-title", disabled = "disabled" }))
+                                @Html.RequiredHint()
+                                @Html.ValidationMessageFor(model => model.AddArticleReview.Title)
+                            </div>
+                            <div class="inputs">
+                                @Html.LabelFor(model => model.AddArticleReview.ReviewText, new { }, ":")
+                                @Html.TextAreaFor(model => model.AddArticleReview.ReviewText, Model.AddArticleReview.CanCurrentCustomerLeaveReview ? (object)(new { @class = "review-text" }) : (object)(new { @class = "review-text", disabled = "disabled" }))
+                                @Html.RequiredHint()
+                                @Html.ValidationMessageFor(model => model.AddArticleReview.ReviewText)
+                            </div>
+                            <div class="review-rating">
+                                @Html.LabelFor(model => model.AddArticleReview.Rating, new { }, ":")
+                                <ul>
+                                    <li class="label first">@T("Reviews.Fields.Rating.Bad")</li>
+                                    <li class="rating-options">
+                                        @Html.RadioButtonFor(model => model.AddArticleReview.Rating, "1", new { id = "addarticlerating_1" })
+                                        @Html.RadioButtonFor(model => model.AddArticleReview.Rating, "2", new { id = "addarticlerating_2" })
+                                        @Html.RadioButtonFor(model => model.AddArticleReview.Rating, "3", new { id = "addarticlerating_3" })
+                                        @Html.RadioButtonFor(model => model.AddArticleReview.Rating, "4", new { id = "addarticlerating_4" })
+                                        @Html.RadioButtonFor(model => model.AddArticleReview.Rating, "5", new { id = "addarticlerating_5" })
+                                    </li>
+                                    <li class="label last">@T("Reviews.Fields.Rating.Excellent")</li>
+                                </ul>
+                            </div>
+                            @if (Model.AddArticleReview.DisplayCaptcha)
+                            {
+                                <div class="captcha-box">
+                                    @Html.Raw(Html.GenerateCaptcha())
+                                </div>
+                            }
+                        </div>
+                    </div>
+                    <div class="buttons">
+                        <input type="submit" name="add-review" class="button-1 write-article-review-button" value="@T("Reviews.SubmitButton")" />
+                    </div>
+                }
+            </div>
+        }
+        @if (Model.Items.Count > 0)
+        {
+            <div class="article-review-list">
+                <div class="title">
+                    <strong>@T("Reviews.ExistingReviews")</strong>
+                </div>
+                @foreach (var review in Model.Items)
+                {
+                    int ratingPercent = review.Rating * 20;
+                    <div class="article-review-item">
+                        <div class="review-item-head">
+                            <div class="review-title">
+                                <strong>@review.Title</strong>
+                            </div>
+                            <div class="article-review-box">
+                                <div class="rating">
+                                    <div style="width: @(ratingPercent)%">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="review-content">
+                            <div class="review-text">
+                                @Html.Raw(YStory.Core.Html.HtmlHelper.FormatText(review.ReviewText, false, true, false, false, false, false))
+                            </div>
+                            <div class="review-info">
+                                <span class="user">
+                                    <label>@T("Reviews.From"):</label>
+                                    @if (review.AllowViewingProfiles)
+                                    {
+                                        <a href="@Url.RouteUrl("CustomerProfile", new { id = review.CustomerId })">@(review.CustomerName)</a>
+                                    }
+                                    else
+                                    {
+                                        @review.CustomerName
+                                    }
+                                </span>
+                                <span class="separator">|</span>
+                                <span class="date">
+                                    <label>@T("Reviews.Date"):</label>
+                                    <span>@review.WrittenOnStr</span>
+                                </span>
+                            </div>
+                            @Html.Partial("_ArticleReviewHelpfulness", review.Helpfulness, new ViewDataDictionary())
+                            @Html.Widget("articlereviews_page_inside_review", review.Id)
+                            @if (!String.IsNullOrEmpty(review.ReplyText))
+                            {
+                                <div class="reply">
+                                    <div class="reply-header">
+                                        @T("Reviews.Reply")
+                                    </div>
+                                    <div class="reply-text">
+                                        @Html.Raw(YStory.Core.Html.HtmlHelper.FormatText(review.ReplyText, false, true, false, false, false, false))
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        @Html.Widget("articlereviews_page_bottom", Model.ArticleId)
+    </div>
+</div>

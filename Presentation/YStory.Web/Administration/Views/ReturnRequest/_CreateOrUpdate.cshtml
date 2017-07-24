@@ -1,0 +1,137 @@
+﻿@model ReturnRequestModel
+
+@using YStory.Core.Domain.Subscriptions;
+@using YStory.Services
+
+@Html.ValidationSummary(false)
+@Html.HiddenFor(model => model.Id)
+
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel-group">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.CustomNumber)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryDisplayFor(model => model.CustomNumber)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.CustomSubscriptionNumber)
+                        </div>
+                        <div class="col-md-9">
+                            @if (Model.SubscriptionId > 0)
+                            {
+                                @Html.ActionLink(Model.CustomSubscriptionNumber, "Edit", "Subscription", new {id = Model.SubscriptionId}, new {})
+                            }
+                            else
+                            {
+                                <text>Subscription item is deleted</text>
+                            }
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.CustomerId)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.ActionLink(Model.CustomerInfo, "Edit", "Customer", new { id = Model.CustomerId }, new { })
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.ArticleName)
+                        </div>
+                        <div class="col-md-9">
+                            @if (Model.ArticleId > 0)
+                            {
+                                @Html.ActionLink(Model.ArticleName, "Edit", "Article", new { id = Model.ArticleId }, new { })
+                            }
+                            else
+                            {
+                                <text>Subscription item is deleted</text>
+                            }
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.Quantity)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryEditorFor(model => model.Quantity)
+                            @Html.ValidationMessageFor(model => model.Quantity)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.ReturnRequestStatusId)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryDropDownListFor(model => model.ReturnRequestStatusId, ((ReturnRequestStatus)Model.ReturnRequestStatusId).ToSelectList())
+                            @Html.ValidationMessageFor(model => model.ReturnRequestStatusId)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.ReasonForReturn)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryEditorFor(model => model.ReasonForReturn, required: true)
+                            @Html.ValidationMessageFor(model => model.ReasonForReturn)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.RequestedAction)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryEditorFor(model => model.RequestedAction, required: true)
+                            @Html.ValidationMessageFor(model => model.RequestedAction)
+                        </div>
+                    </div>
+                    @if (Model.UploadedFileGuid != Guid.Empty)
+                    {
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.YStoryLabelFor(model => model.UploadedFileGuid)
+                            </div>
+                            <div class="col-md-9">
+                                <a href="@Url.Action("DownloadFile", "Download", new {downloadGuid = Model.UploadedFileGuid})">@T("Admin.ReturnRequests.Fields.UploadedFile.Download")</a>
+                            </div>
+                        </div>
+                    }
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.CustomerComments)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryTextAreaFor(model => model.CustomerComments)
+                            @Html.ValidationMessageFor(model => model.CustomerComments)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.StaffNotes)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryTextAreaFor(model => model.StaffNotes)
+                            @Html.ValidationMessageFor(model => model.StaffNotes)
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            @Html.YStoryLabelFor(model => model.CreatedOn)
+                        </div>
+                        <div class="col-md-9">
+                            @Html.YStoryDisplayFor(model => model.CreatedOn)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

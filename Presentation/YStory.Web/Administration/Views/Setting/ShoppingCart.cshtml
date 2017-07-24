@@ -1,0 +1,266 @@
+﻿@model ShoppingCartSettingsModel
+
+@{
+    //page title
+    ViewBag.Title = T("Admin.Configuration.Settings.ShoppingCart").Text;
+    //active menu item (system name)
+    Html.SetActiveMenuItemSystemName("Shopping cart settings");
+}
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            @T("Admin.Configuration.Settings.ShoppingCart")
+        </h1>
+        <div class="pull-right">
+            <button type="submit" name="save" class="btn bg-blue">
+                <i class="fa fa-floppy-o"></i>
+                @T("Admin.Common.Save")
+            </button>
+        </div>
+    </div>
+
+
+    <div class="content">
+        <div class="form-horizontal">
+            @Html.Action("StoreScopeConfiguration", "Setting")
+            @Html.Action("Mode", "Setting")
+            @Html.ValidationSummary(false)
+
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        @T("Admin.Configuration.Settings.ShoppingCart.BlockTitle.Common")
+                    </div>
+                    <div class="panel-body">
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.ShowDiscountBox_OverrideForStore, model => model.ShowDiscountBox, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.ShowDiscountBox)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.ShowDiscountBox)
+                                @Html.ValidationMessageFor(model => model.ShowDiscountBox)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.ShowGiftCardBox_OverrideForStore, model => model.ShowGiftCardBox, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.ShowGiftCardBox)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.ShowGiftCardBox)
+                                @Html.ValidationMessageFor(model => model.ShowGiftCardBox)
+                            </div>
+                        </div>
+                        <div class="form-group advanced-setting">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.AllowCartItemEditing_OverrideForStore, model => model.AllowCartItemEditing, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.AllowCartItemEditing)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.AllowCartItemEditing)
+                                @Html.ValidationMessageFor(model => model.AllowCartItemEditing)
+                            </div>
+                        </div>
+                        <div class="form-group advanced-setting">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.MaximumShoppingCartItems_OverrideForStore, model => model.MaximumShoppingCartItems, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.MaximumShoppingCartItems)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.MaximumShoppingCartItems)
+                                @Html.ValidationMessageFor(model => model.MaximumShoppingCartItems)
+                            </div>
+                        </div>
+                        <div class="form-group advanced-setting">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.CartsSharedBetweenStores_OverrideForStore, model => model.CartsSharedBetweenStores, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.CartsSharedBetweenStores)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.CartsSharedBetweenStores)
+                                @Html.ValidationMessageFor(model => model.CartsSharedBetweenStores)
+                            </div>
+                        </div>
+                        <div class="form-group advanced-setting">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.ShowArticleImagesOnShoppingCart_OverrideForStore, model => model.ShowArticleImagesOnShoppingCart, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.ShowArticleImagesOnShoppingCart)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.ShowArticleImagesOnShoppingCart)
+                                @Html.ValidationMessageFor(model => model.ShowArticleImagesOnShoppingCart)
+                            </div>
+                        </div>
+                        <div class="form-group advanced-setting">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.DisplayCartAfterAddingArticle_OverrideForStore, model => model.DisplayCartAfterAddingArticle, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.DisplayCartAfterAddingArticle)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.DisplayCartAfterAddingArticle)
+                                @Html.ValidationMessageFor(model => model.DisplayCartAfterAddingArticle)
+                            </div>
+                        </div>
+                        <div class="form-group advanced-setting">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.CrossSellsNumber_OverrideForStore, model => model.CrossSellsNumber, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.CrossSellsNumber)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.CrossSellsNumber)
+                                @Html.ValidationMessageFor(model => model.CrossSellsNumber)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        @T("Admin.Configuration.Settings.ShoppingCart.BlockTitle.MiniShoppingCart")
+                    </div>
+                    <div class="panel-body">
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.MiniShoppingCartEnabled_OverrideForStore, model => model.MiniShoppingCartEnabled, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.MiniShoppingCartEnabled)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.MiniShoppingCartEnabled)
+                                @Html.ValidationMessageFor(model => model.MiniShoppingCartEnabled)
+                            </div>
+                        </div>
+                        <div class="form-group advanced-setting" id="pnlMiniShoppingCartArticleNumber">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.MiniShoppingCartArticleNumber_OverrideForStore, model => model.MiniShoppingCartArticleNumber, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.MiniShoppingCartArticleNumber)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.MiniShoppingCartArticleNumber)
+                                @Html.ValidationMessageFor(model => model.MiniShoppingCartArticleNumber)
+                            </div>
+                        </div>
+                        <div class="form-group advanced-setting" id="pnlShowArticleImagesInMiniShoppingCart">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.ShowArticleImagesInMiniShoppingCart_OverrideForStore, model => model.ShowArticleImagesInMiniShoppingCart, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.ShowArticleImagesInMiniShoppingCart)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.ShowArticleImagesInMiniShoppingCart)
+                                @Html.ValidationMessageFor(model => model.ShowArticleImagesInMiniShoppingCart)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel panel-default advanced-setting">
+                    <div class="panel-heading">
+                        @T("Admin.Configuration.Settings.ShoppingCart.BlockTitle.Wishlist")
+                    </div>
+                    <div class="panel-body">
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.MaximumWishlistItems_OverrideForStore, model => model.MaximumWishlistItems, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.MaximumWishlistItems)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.MaximumWishlistItems)
+                                @Html.ValidationMessageFor(model => model.MaximumWishlistItems)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.ShowArticleImagesOnWishList_OverrideForStore, model => model.ShowArticleImagesOnWishList, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.ShowArticleImagesOnWishList)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.ShowArticleImagesOnWishList)
+                                @Html.ValidationMessageFor(model => model.ShowArticleImagesOnWishList)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.EmailWishlistEnabled_OverrideForStore, model => model.EmailWishlistEnabled, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.EmailWishlistEnabled)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.EmailWishlistEnabled)
+                                @Html.ValidationMessageFor(model => model.EmailWishlistEnabled)
+                            </div>
+                        </div>
+                        <div class="form-group" id="pnlAllowAnonymousUsersToEmailWishlist">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.AllowAnonymousUsersToEmailWishlist_OverrideForStore, model => model.AllowAnonymousUsersToEmailWishlist, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.AllowAnonymousUsersToEmailWishlist)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.AllowAnonymousUsersToEmailWishlist)
+                                @Html.ValidationMessageFor(model => model.AllowAnonymousUsersToEmailWishlist)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.AllowOutOfStockItemsToBeAddedToWishlist_OverrideForStore, model => model.AllowOutOfStockItemsToBeAddedToWishlist, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.AllowOutOfStockItemsToBeAddedToWishlist)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.AllowOutOfStockItemsToBeAddedToWishlist)
+                                @Html.ValidationMessageFor(model => model.AllowOutOfStockItemsToBeAddedToWishlist)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.MoveItemsFromWishlistToCart_OverrideForStore, model => model.MoveItemsFromWishlistToCart, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.MoveItemsFromWishlistToCart)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.MoveItemsFromWishlistToCart)
+                                @Html.ValidationMessageFor(model => model.MoveItemsFromWishlistToCart)
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                @Html.OverrideStoreCheckboxFor(model => model.DisplayWishlistAfterAddingArticle_OverrideForStore, model => model.DisplayWishlistAfterAddingArticle, Model.ActiveStoreScopeConfiguration)
+                                @Html.YStoryLabelFor(model => model.DisplayWishlistAfterAddingArticle)
+                            </div>
+                            <div class="col-md-9">
+                                @Html.YStoryEditorFor(model => model.DisplayWishlistAfterAddingArticle)
+                                @Html.ValidationMessageFor(model => model.DisplayWishlistAfterAddingArticle)
+                            </div>
+                        </div>
+                    </div>
+
+                    <script type="text/javascript">
+                        $(document).ready(function () {
+                            $("#@Html.FieldIdFor(model => model.MiniShoppingCartEnabled)").click(toggleMiniShoppingCartEnabled);
+                            $("#@Html.FieldIdFor(model => model.EmailWishlistEnabled)").click(toggleEmailWishlistEnabled);
+
+                            toggleMiniShoppingCartEnabled();
+                            toggleEmailWishlistEnabled();
+                        });
+
+                        function toggleMiniShoppingCartEnabled() {
+                            if ($('#@Html.FieldIdFor(model => model.MiniShoppingCartEnabled)').is(':checked')) {
+                                $('#pnlMiniShoppingCartArticleNumber').show();
+                                $('#pnlShowArticleImagesInMiniShoppingCart').show();
+                            } else {
+                                $('#pnlMiniShoppingCartArticleNumber').hide();
+                                $('#pnlShowArticleImagesInMiniShoppingCart').hide();
+                            }
+                        }
+
+                        function toggleEmailWishlistEnabled() {
+                            if ($('#@Html.FieldIdFor(model => model.EmailWishlistEnabled)').is(':checked')) {
+                                $('#pnlAllowAnonymousUsersToEmailWishlist').show();
+                            } else {
+                                $('#pnlAllowAnonymousUsersToEmailWishlist').hide();
+                            }
+                        }
+
+                    </script>
+                </div>
+            </div>
+        </div>
+    </div>
+}
